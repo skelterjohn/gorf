@@ -2,3 +2,6 @@ build
 gorf.xcodeproj
 _obj
 bin
+_go_.6
+gorf
+target.gb

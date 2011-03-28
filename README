@@ -1,7 +1,13 @@
 
-gorf mvpkg "oldpath" "newpath"
-
-gorf mvglobal "package path" oldname newname
-  can be for func, type, var, const
-  
+invokations:
+gorf package "package path" newname
+gorf mvtarget "oldpath" "newpath"
+gorf mvglobal "package path" oldname newname  
 gorf mvfield "package path" typename oldfield newfield
+
+gorf will consider all source visible in subdirectories from the CWD to
+be fair game.
+
+If a particular global or type is defined in multiple source files, gorf
+will act on all of them individually, trusting the builder to know to not
+compile them together.
