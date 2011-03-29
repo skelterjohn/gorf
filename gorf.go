@@ -25,6 +25,13 @@ func main() {
 		}
 		old, new := os.Args[2], os.Args[3]
 		err = MvTarget(old, new)
+	case "package":
+		if len(os.Args) != 5 {
+			Usage()
+			return
+		}
+		target, old, new := os.Args[2], os.Args[3], os.Args[4]
+		err = ChangePackages(target, old, new)
 	case "undo":
 		if len(os.Args) != 2 {
 			Usage()

@@ -19,7 +19,6 @@ func ParseSource(fpath string) (err os.Error) {
 	var ft *ast.File
 	ft, err = parser.ParseFile(token.NewFileSet(), fpath, nil, 0)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	AllSources[fpath] = ft
@@ -59,7 +58,7 @@ func Copy(srcpath, dstpath string) (err os.Error) {
 
 func BackupSource(fpath string) (err os.Error) {
 	dir, name := filepath.Split(fpath)
-	backup := ".gorf."+name
+	backup := "."+name+".gorf"
 	err = Copy(fpath, filepath.Join(dir, backup))
 	return
 }

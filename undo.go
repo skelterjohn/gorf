@@ -19,7 +19,9 @@ func (this undoscanner) VisitDir(dpath string, f *os.FileInfo) bool {
 }
 
 func (this undoscanner) VisitFile(fpath string, f *os.FileInfo) {
-	if !strings.HasSuffix(fpath, ".go") {
+	if !(strings.HasSuffix(fpath, ".go") ||
+			strings.HasSuffix(fpath, ".gorf") ||
+			strings.HasSuffix(fpath, ".gorfn")) {
 		return
 	}
 	
@@ -30,16 +32,16 @@ func (this undoscanner) VisitFile(fpath string, f *os.FileInfo) {
 	dir = filepath.Clean(dir)
 	
 	// the realfile was modified by the last command
-	if strings.HasPrefix(file, ".gorf.") {
-		realfile := file[len(".gorf."):]
+	if strings.HasSuffix(file, ".gorf") {
+		realfile := file[1:len(file)-len(".gorf")]
 		Copy(fpath, filepath.Join(dir, realfile))
 		os.Remove(fpath)
 		return
 	}
 	
 	// the realfile was created by the last command
-	if strings.HasPrefix(file, ".gorfn.") {
-		realfile := file[len(".gorfn."):]
+	if strings.HasSuffix(file, ".gorfn") {
+		realfile := file[1:len(file)-len(".gorfn")]
 		os.Remove(filepath.Join(dir, realfile))
 		os.Remove(fpath)
 		return

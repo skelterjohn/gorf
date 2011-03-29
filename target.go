@@ -57,7 +57,6 @@ func (this scanner) VisitFile(fpath string, f *os.FileInfo) {
 	dir = filepath.Clean(dir)
 	
 	if strings.HasPrefix(file, ".gorf.") {
-		fmt.Println(".gorf.", file)
 		os.Remove(file)
 		return
 	}
@@ -66,9 +65,13 @@ func (this scanner) VisitFile(fpath string, f *os.FileInfo) {
 		return
 	}
 	
-	ParseSource(fpath)
+	err := ParseSource(fpath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+	}
 	
-	name, err := GetSourcePackageName(fpath)
+	var name string
+	name, err = GetSourcePackageName(fpath)
 	if err != nil {
 		panic(err)
 	}

@@ -40,7 +40,7 @@ func MvTarget(oldpath, newpath string) (err os.Error) {
 	
 	for _, dirTarget := range dirTargets {
 		for _, src := range dirTarget.Source {
-			BackupSource(src)
+			BackupSource(filepath.Join(dirTarget.Path, src))
 		}
 	}
 	
@@ -59,7 +59,7 @@ func MvTarget(oldpath, newpath string) (err os.Error) {
 			Verbose = true
 			Copy(sf, nsf)
 			os.Remove(sf)
-			Touch(filepath.Join(newpath, ".gorfn."+src))
+			Touch(filepath.Join(newpath, "."+src+".gorfn"))
 		}
 	}
 	return
