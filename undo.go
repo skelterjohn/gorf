@@ -29,9 +29,18 @@ func (this undoscanner) VisitFile(fpath string, f *os.FileInfo) {
 	}
 	dir = filepath.Clean(dir)
 	
+	// the realfile was modified by the last command
 	if strings.HasPrefix(file, ".gorf.") {
 		realfile := file[len(".gorf."):]
-		Copy(dir, file, realfile)
+		Copy(fpath, filepath.Join(dir, realfile))
+		os.Remove(fpath)
+		return
+	}
+	
+	// the realfile was created by the last command
+	if strings.HasPrefix(file, ".gorfn.") {
+		realfile := file[len(".gorfn."):]
+		os.Remove(filepath.Join(dir, realfile))
 		os.Remove(fpath)
 		return
 	}

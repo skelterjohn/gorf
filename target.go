@@ -14,7 +14,18 @@ type Target struct {
 
 var (
 	AllTargets = make(map[string]*Target)
+	DirNameTargets = make(map[string]map[string]*Target)
 )
+
+func GetDirTargets(dir string) (dts map[string]*Target) {
+	var ok bool
+	dts, ok = DirNameTargets[dir]
+	if !ok {
+		dts = make(map[string]*Target)
+		DirNameTargets[dir] = dts
+	}
+	return
+}
 
 func ListTargetsSource() {
 	for _, i := range AllTargets {
@@ -46,6 +57,11 @@ func (this scanner) VisitFile(fpath string, f *os.FileInfo) {
 	dir = filepath.Clean(dir)
 	
 	if strings.HasPrefix(file, ".gorf.") {
+		fmt.Println(".gorf.", file)
+		os.Remove(file)
+		return
+	}
+	if strings.HasPrefix(file, ".gorfn.") {
 		os.Remove(file)
 		return
 	}
@@ -64,6 +80,7 @@ func (this scanner) VisitFile(fpath string, f *os.FileInfo) {
 		i.Name, i.Path = name, dir
 		AllTargets[importKey] = i
 	}
-	
 	i.Source = append(i.Source, file)
+	
+	GetDirTargets(dir)[name] = i
 }
