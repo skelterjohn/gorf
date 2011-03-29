@@ -25,3 +25,6 @@ be fair game.
 If a particular global or type is defined in multiple source files, gorf
 will act on all of them individually, trusting the builder to know to not
 compile them together.
+
+The field-name refactorer will have to wait until the go/typechecker
+package is finished.

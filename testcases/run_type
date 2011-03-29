@@ -1,0 +1,6 @@
+rm -rf test
+cp -r testdata test
+cd test
+gorf type place place MyType MyType2
+cd -
+diff -r test testtyperes

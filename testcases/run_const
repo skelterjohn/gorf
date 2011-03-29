@@ -1,0 +1,8 @@
+rm -rf test
+cp -r testdata test
+cd test
+gorf const place place CX CXX
+gorf const place place CY CZZ
+cd -
+diff -r test testconstres
+
