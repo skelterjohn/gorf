@@ -1,6 +1,6 @@
 package test
 
-import "place"
+import "place2"
 
 var Q place.MyType
 

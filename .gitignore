@@ -5,5 +5,3 @@ bin
 _go_.6
 gorf
 target.gb
-*.gorf
-*.gorfn

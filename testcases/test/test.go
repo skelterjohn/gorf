@@ -7,7 +7,7 @@ var Q place.MyType
 func Foo() {
 	place.Bar()
 	if true {
-		println(place.X)
+		println(place.XX)
 		println(place.MyType(1))
 		println(place.CX)
 		var place struct{ Bar func() }
@@ -16,6 +16,6 @@ func Foo() {
 		}}
 		place.Bar()
 	}
-	println(place.Z)
+	println(place.ZZ)
 	place.Bar()
 }
