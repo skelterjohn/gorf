@@ -17,6 +17,8 @@ commands:
 A target is the import path. Targets and relative paths to package
 directories need to match.
 
+Relative paths are not noticed (yet)
+
 gorf will consider all source visible in subdirectories from the CWD to
 be fair game.
 
