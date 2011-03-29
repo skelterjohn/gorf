@@ -4,7 +4,6 @@ import (
 	"os"
 	"fmt"
 	"go/ast"
-	"go/token"
 	"path/filepath"
 )
 
@@ -48,7 +47,7 @@ func ChangePackage(src, oldpkg, newpkg string) (err os.Error) {
 }
 
 func ChangePackageRef(src string, ft *ast.File, target, oldpkg, newpkg string) (err os.Error) {
-	target = "\""+target+"\""
+
 	checker := &ImportPathChecker{path:target}
 	ast.Walk(checker, ft)
 	if !checker.needsChange {
@@ -81,32 +80,20 @@ func (w *PackageIdentChanger) Visit(node ast.Node) (v ast.Visitor) {
 		fmt.Printf("Node type: %T\nNode: %v\n\n", node, node)
 	}
 	*/
+	if NodeRedefinesIdent(node, w.oldpkg, w) {
+		w.redefined = true
+		return nil
+	}
+	
 	switch n := node.(type) {
 	case *ast.BlockStmt:
-		changer := &PackageIdentChanger{oldpkg:w.oldpkg, newpkg:w.newpkg, changed:w.changed}
+		changer := &PackageIdentChanger{}
+		*changer = *w
 		return changer
-	case *ast.AssignStmt:
-		if n.Tok == token.DEFINE {
-			for _, e := range n.Lhs {
-				if id, ok := e.(*ast.Ident); ok {
-					if id.Name == w.oldpkg {
-						w.redefined = true
-						return nil
-					}
-				}
-			}
-		}
-	case *ast.GenDecl:
-		for _, spec := range n.Specs {
-			if vs, ok := spec.(*ast.ValueSpec); ok {
-				for _, id := range vs.Names {
-					if id.Name == w.oldpkg {
-						w.redefined = true
-						return nil
-					}
-				}
-			}
-		}
+	case *ast.FuncDecl:
+		changer := &PackageIdentChanger{}
+		*changer = *w
+		return changer
 	case *ast.SelectorExpr:
 		if id, ok := n.X.(*ast.Ident); ok {
 			if id.Name == w.oldpkg {
@@ -120,13 +107,14 @@ func (w *PackageIdentChanger) Visit(node ast.Node) (v ast.Visitor) {
 
 type ImportPathChecker struct {
 	path string
+	name string
 	needsChange bool
 }
 
 func (w *ImportPathChecker) Visit(node ast.Node) (v ast.Visitor) {
 	switch n := node.(type) {
 	case *ast.ImportSpec:
-		if string(n.Path.Value) == w.path {
+		if string(n.Path.Value) == QuoteTarget(w.path) {
 			if n.Name == nil {	
 				w.needsChange = true
 			}

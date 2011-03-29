@@ -77,8 +77,6 @@ func ChangeImportPaths(oldpath, newpath string) (err os.Error) {
 }
 
 func ChangeImportPath(oldpath, newpath string, ft *ast.File) (changed bool, err os.Error) {
-	oldpath = "\""+oldpath+"\""
-	newpath = "\""+newpath+"\""
 	ipc := &ImportPathChanger{old:oldpath, new:newpath}
 	ast.Walk(ipc, ft)
 	changed = ipc.changed
@@ -93,8 +91,8 @@ type ImportPathChanger struct {
 func (w *ImportPathChanger) Visit(node ast.Node) (v ast.Visitor) {
 	switch n := node.(type) {
 	case *ast.ImportSpec:
-		if string(n.Path.Value) == w.old {
-			n.Path.Value = []byte(w.new)
+		if string(n.Path.Value) == QuoteTarget(w.old) {
+			n.Path.Value = []byte(QuoteTarget(w.new))
 			w.changed = true
 			return nil
 		}
