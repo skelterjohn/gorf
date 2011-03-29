@@ -4,6 +4,7 @@ import (
 	"os"
 	"fmt"
 	"go/ast"
+	"go/token"
 	"path/filepath"
 )
 
@@ -34,6 +35,18 @@ func ChangeIdent(kind, target, pkgname, oldname, newname string) (err os.Error) 
 			case "var":
 				cli := ChangeLocalVarWalker{
 					oldident:oldname, newident:newname,
+					tok:token.VAR,
+					changed:new(bool),
+				}
+				ast.Walk(&cli, ft)
+				if *cli.changed {
+					changed = true
+					RewriteSource(fpath, ft)
+				}
+			case "const":
+				cli := ChangeLocalVarWalker{
+					oldident:oldname, newident:newname,
+					tok:token.CONST,
 					changed:new(bool),
 				}
 				ast.Walk(&cli, ft)
@@ -69,6 +82,8 @@ func ChangeIdent(kind, target, pkgname, oldname, newname string) (err os.Error) 
 			
 			}
 		}
+	} else {
+		err = os.NewError(fmt.Sprintf("Found no occurences of %s in package %s in '%s'", oldname, pkgname, target))
 	}
 	
 	return

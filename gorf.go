@@ -46,6 +46,13 @@ func main() {
 		}
 		target, pkg, old, new := os.Args[2], os.Args[3], os.Args[4], os.Args[5]
 		err = ChangeIdent("var", target, pkg, old, new)
+	case "const":
+		if len(os.Args) != 6 {
+			Usage()
+			return
+		}
+		target, pkg, old, new := os.Args[2], os.Args[3], os.Args[4], os.Args[5]
+		err = ChangeIdent("const", target, pkg, old, new)
 	case "type":
 		if len(os.Args) != 6 {
 			Usage()

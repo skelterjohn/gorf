@@ -56,7 +56,6 @@ func MvTarget(oldpath, newpath string) (err os.Error) {
 		for _, src := range dirTarget.Source {
 			sf := filepath.Join(dirTarget.Path, src)
 			nsf := filepath.Join(newpath, src)
-			Verbose = true
 			Copy(sf, nsf)
 			os.Remove(sf)
 			Touch(filepath.Join(newpath, "."+src+".gorfn"))

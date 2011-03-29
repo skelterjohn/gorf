@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 )
 
 type ChangeLocalVarWalker struct {
 	oldident, newident string
+	tok token.Token
 	changed *bool
 	redefined bool
 	nested bool
@@ -38,6 +40,10 @@ func (w *ChangeLocalVarWalker) Visit(node ast.Node) (v ast.Visitor) {
 		*changer = *w
 		changer.nested = true
 		return changer
+	case *ast.GenDecl:
+		if n.Tok != w.tok {
+			return nil
+		}
 	case *ast.ValueSpec:
 		for _, name := range n.Names {
 			if name.Name == w.oldident {
