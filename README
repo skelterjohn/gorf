@@ -1,9 +1,12 @@
+Usage: gorf <command>
 
-invokations:
-gorf package "package path" newname
-gorf mvtarget "oldpath" "newpath"
-gorf mvglobal "package path" oldname newname  
-gorf mvfield "package path" typename oldfield newfield
+commands:
+ target <old target> <new target>
+ package <target> <old name> <new name>
+ global <target> <old name> <new name>
+ field <target> <type> <old name> <new name>
+ undo
+
 
 gorf will consider all source visible in subdirectories from the CWD to
 be fair game.
