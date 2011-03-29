@@ -2,6 +2,8 @@ DO NOT RUN THIS ON IMPORTANT CODE
 
 IT WILL REWRITE YOUR CODE WITH NO GUARANTEE OF CORRECTNESS
 
+To test, go to testcases and run one of the run_* scripts.
+
 Usage: gorf <command>
 
 commands:
