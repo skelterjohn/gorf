@@ -9,11 +9,13 @@ commands:
  package <target> <old name> <new name>
  func <target> <package> <old name> <new name>
  var <target> <package> <old name> <new name>
- //const <target> <package> <old name> <new name>
+ const <target> <package> <old name> <new name>
  type <target> <package> <old name> <new name>
  //field <target> <package> <type> <old name> <new name>
  undo
 
+A target is the import path. Targets and relative paths to package
+directories need to match.
 
 gorf will consider all source visible in subdirectories from the CWD to
 be fair game.
