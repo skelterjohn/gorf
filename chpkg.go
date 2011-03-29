@@ -10,6 +10,11 @@ import (
 func ChangePackages(target, oldpkg, newpkg string) (err os.Error) {
 	ScanForTargets()
 	
+	if _, ok := GetDirTargets(target)[newpkg]; ok {
+		err = os.NewError(fmt.Sprintf("Package %s already exists in '%s'", newpkg, target))
+		return
+	}
+	
 	dirTarget, ok := GetDirTargets(target)[oldpkg]
 	if !ok {
 		err = os.NewError(fmt.Sprintf("No target %s found in '%s'", oldpkg, target))

@@ -6,7 +6,7 @@ import (
 
 type ChangeLocalFuncWalker struct {
 	oldident, newident string
-	changed *bool
+	changed, exists *bool
 	redefined bool
 }
 
@@ -25,6 +25,9 @@ func (w *ChangeLocalFuncWalker) Visit(node ast.Node) (v ast.Visitor) {
 		*changer = *w
 		return changer
 	case *ast.FuncDecl:
+		if n.Name.Name == w.newident {
+			*w.exists = true
+		}
 		if n.Name.Name == w.oldident {
 			n.Name.Name = w.newident
 			*w.changed = true

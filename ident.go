@@ -25,9 +25,12 @@ func ChangeIdent(kind, target, pkgname, oldname, newname string) (err os.Error) 
 			case "func":
 				cli := ChangeLocalFuncWalker{
 					oldident:oldname, newident:newname,
-					changed:new(bool),
+					changed:new(bool), exists:new(bool),
 				}
 				ast.Walk(&cli, ft)
+				if *cli.exists {
+					err = os.NewError(fmt.Sprintf("%s %s already exists in package %s in '%s'", kind, newname, pkgname, target))
+				}
 				if *cli.changed {
 					changed = true
 					RewriteSource(fpath, ft)
@@ -36,9 +39,12 @@ func ChangeIdent(kind, target, pkgname, oldname, newname string) (err os.Error) 
 				cli := ChangeLocalVarWalker{
 					oldident:oldname, newident:newname,
 					tok:token.VAR,
-					changed:new(bool),
+					changed:new(bool), exists:new(bool),
 				}
 				ast.Walk(&cli, ft)
+				if *cli.exists {
+					err = os.NewError(fmt.Sprintf("%s %s already exists in package %s in '%s'", kind, newname, pkgname, target))
+				}
 				if *cli.changed {
 					changed = true
 					RewriteSource(fpath, ft)
@@ -47,9 +53,12 @@ func ChangeIdent(kind, target, pkgname, oldname, newname string) (err os.Error) 
 				cli := ChangeLocalVarWalker{
 					oldident:oldname, newident:newname,
 					tok:token.CONST,
-					changed:new(bool),
+					changed:new(bool), exists:new(bool),
 				}
 				ast.Walk(&cli, ft)
+				if *cli.exists {
+					err = os.NewError(fmt.Sprintf("%s %s already exists in package %s in '%s'", kind, newname, pkgname, target))
+				}
 				if *cli.changed {
 					changed = true
 					RewriteSource(fpath, ft)

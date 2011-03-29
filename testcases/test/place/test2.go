@@ -4,15 +4,15 @@ import "fmt"
 
 type MyType int
 
-var ZZ = 3
+var Z = 3
 var (
-	XX	int
+	X	int
 	W	MyType
 )
 
-const CX = 3
+const CXX = 3
 const (
-	CY = 5
+	CZZ = 5
 )
 
 func Bar() {
@@ -25,7 +25,7 @@ func Bar() {
 	_ = w
 }
 func F() {
-	XX = 2
+	X = 2
 	Bar()
 	y := Bar
 	y()

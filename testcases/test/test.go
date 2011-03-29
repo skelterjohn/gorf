@@ -7,15 +7,15 @@ var Q place.MyType
 func Foo() {
 	place.Bar()
 	if true {
-		println(place.XX)
+		println(place.X)
 		println(place.MyType(1))
-		println(place.CX)
+		println(place.CXX)
 		var place struct{ Bar func() }
 		place = struct{ Bar func() }{func() {
 			println("a")
 		}}
 		place.Bar()
 	}
-	println(place.ZZ)
+	println(place.Z)
 	place.Bar()
 }

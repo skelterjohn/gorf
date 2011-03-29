@@ -48,9 +48,12 @@ func ChangeType(target, pkgname, oldname, newname string) (err os.Error) {
 				clt := ChangeTypeWalker {
 					pkgname:pkgname,
 					oldident:oldname, newident:newname,
-					changed:new(bool),
+					changed:new(bool), exists:new(bool),
 				}
 				ast.Walk(&clt, ft)
+				if *clt.exists {
+					err = os.NewError(fmt.Sprintf("type %s already exists in package %s in '%s'", newname, pkgname, target))
+				}
 				if *clt.changed {
 					changed = true
 					RewriteSource(fpath, ft)
@@ -65,7 +68,7 @@ func ChangeType(target, pkgname, oldname, newname string) (err os.Error) {
 type ChangeTypeWalker struct {
 	pkgname string
 	oldident, newident string
-	changed *bool
+	changed, exists *bool
 }
 
 func (w *ChangeTypeWalker) Visit(node ast.Node) (v ast.Visitor) {

@@ -9,7 +9,7 @@ import (
 type ChangeLocalVarWalker struct {
 	oldident, newident string
 	tok token.Token
-	changed *bool
+	changed, exists *bool
 	redefined bool
 	nested bool
 }
