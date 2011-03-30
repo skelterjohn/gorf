@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 	"go/ast"
 	"go/token"
 	"unicode"
@@ -24,7 +25,7 @@ func IsLegalIdentifier(id string) bool {
 }
 
 func QuoteTarget(target string) (qt string) {
-	return fmt.Sprintf("\"%s\"", target)
+	return fmt.Sprintf("\"%s\"", filepath.Clean(target))
 }
 
 /*

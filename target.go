@@ -18,6 +18,7 @@ var (
 )
 
 func GetDirTargets(dir string) (dts map[string]*Target) {
+	dir = filepath.Clean(dir)
 	var ok bool
 	dts, ok = DirNameTargets[dir]
 	if !ok {
