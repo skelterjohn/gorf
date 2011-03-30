@@ -9,6 +9,14 @@ import (
 
 
 func ChangeType(target, pkgname, oldname, newname string) (err os.Error) {
+	if !IsLegalIdentifier(pkgname) {
+		err = os.NewError(fmt.Sprintf("Package name %s is not a legal identifier", pkgname))
+		return
+	}
+	if !IsLegalIdentifier(newname) {
+		err = os.NewError(fmt.Sprintf("New type name %s is not a legal identifier", newname))
+		return
+	}
 	ScanForTargets()
 	
 	targ, ok := GetDirTargets(target)[pkgname]

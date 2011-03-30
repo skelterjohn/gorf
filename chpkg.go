@@ -8,6 +8,11 @@ import (
 )
 
 func ChangePackages(target, oldpkg, newpkg string) (err os.Error) {
+	if !IsLegalIdentifier(newpkg) {
+		err = os.NewError(fmt.Sprintf("Package name %s is not a legal identifier", newpkg))
+		return
+	}
+
 	ScanForTargets()
 	
 	if _, ok := GetDirTargets(target)[newpkg]; ok {

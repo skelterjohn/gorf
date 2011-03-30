@@ -4,7 +4,24 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"unicode"
+	"utf8"
 )
+
+func IsLegalIdentifier(id string) bool {
+	if len(id) == 0 {
+		return false
+	}
+	if !unicode.IsLetter(utf8.NewString(id).At(0)) {
+		return false
+	}
+	for _, c := range id[1:] {
+		if !unicode.IsLetter(c) && !unicode.IsDigit(c) {
+			return false
+		}
+	}
+	return true
+}
 
 func QuoteTarget(target string) (qt string) {
 	return fmt.Sprintf("\"%s\"", target)
