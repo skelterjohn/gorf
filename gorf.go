@@ -1,81 +1,62 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"fmt"
+	"flag"
+	"gonicetrace.googlecode.com/hg/nicetrace"
 )
 
 var (
-	Verbose bool
+	LocalRoot = "."
+	Usage bool
 )
 
+var UsageText = `Usage: gorf [flags] <command>
+commands:
+  var <path> [package] <old name> <new name>
+  pkg <path> <old name> <new name>
+  undo
+`
+
+func MakeErr(format string, args ...interface{}) (os.Error) {
+	return os.NewError(fmt.Sprintf(format, args...))
+}
+
 func main() {
-	if len(os.Args) < 2 {
-		Usage()
+	defer nicetrace.Print()
+	
+	flag.StringVar(&LocalRoot, "r", ".", "Local package root")
+	flag.BoolVar(&Usage, "?", false, "Print usage and quit")
+	
+	flag.Parse()
+	
+	cmds := map[string]func([]string) os.Error {
+		"undo" : UndoCmd,
+		"pkg" : PkgCmd,
+		"var" : VarCmd,
+		"const" : ConstCmd,
+		"func" : FuncCmd,
+		"type" : TypeCmd,
+		"field" : FieldCmd,
+		"scan" : ScanCmd,
+	}
+	
+	foo, ok := cmds[flag.Arg(0)]
+
+	erf := func(format string, args ...interface{}) {
+		fmt.Fprintf(os.Stderr, format, args...)
+	}
+			
+	if !ok || Usage || len(flag.Args()) == 0 {
+		erf(UsageText)
+		erf("flags\n")
+		flag.PrintDefaults()
 		return
 	}
 	
-	var err os.Error
-	
-	switch os.Args[1] {
-	case "target":
-		if len(os.Args) != 4 {
-			Usage()
-			return
-		}
-		old, new := os.Args[2], os.Args[3]
-		err = MvTarget(old, new)
-	case "package":
-		if len(os.Args) != 5 {
-			Usage()
-			return
-		}
-		target, old, new := os.Args[2], os.Args[3], os.Args[4]
-		err = ChangePackages(target, old, new)
-	case "func":
-		if len(os.Args) != 6 {
-			Usage()
-			return
-		}
-		target, pkg, old, new := os.Args[2], os.Args[3], os.Args[4], os.Args[5]
-		err = ChangeIdent("func", target, pkg, old, new)
-	case "var":
-		if len(os.Args) != 6 {
-			Usage()
-			return
-		}
-		target, pkg, old, new := os.Args[2], os.Args[3], os.Args[4], os.Args[5]
-		err = ChangeIdent("var", target, pkg, old, new)
-	case "const":
-		if len(os.Args) != 6 {
-			Usage()
-			return
-		}
-		target, pkg, old, new := os.Args[2], os.Args[3], os.Args[4], os.Args[5]
-		err = ChangeIdent("const", target, pkg, old, new)
-	case "type":
-		if len(os.Args) != 6 {
-			Usage()
-			return
-		}
-		target, pkg, old, new := os.Args[2], os.Args[3], os.Args[4], os.Args[5]
-		err = ChangeType(target, pkg, old, new)
-	case "undo":
-		if len(os.Args) != 2 {
-			Usage()
-			return
-		}
-		err = Undo()
-	default:
-		Usage()
-		return
-	}
-	
+	err := foo(flag.Args()[1:])
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		fmt.Fprintf(os.Stderr, "Undoing changes\n")
-	}
-	if err != nil && os.Args[1] != "undo" {
-		Undo()
+		erf("%v\n", err)
 	}
 }

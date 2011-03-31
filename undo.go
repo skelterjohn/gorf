@@ -6,9 +6,11 @@ import (
 	"strings"
 )
 
-func Undo() (err os.Error) {
-	errch := make(chan os.Error)
-	filepath.Walk(".", undoscanner(0), errch)
+func UndoCmd(args []string) (err os.Error) {
+	if len(args) != 0 {
+		return os.NewError("Usage: gorf [flags] undo")
+	}
+	filepath.Walk(".", undoscanner(0), nil)
 	return
 }
 
@@ -24,13 +26,13 @@ func (this undoscanner) VisitFile(fpath string, f *os.FileInfo) {
 			strings.HasSuffix(fpath, ".gorfn")) {
 		return
 	}
-	
+
 	dir, file := filepath.Split(fpath)
 	if dir == "" {
 		dir = "."
 	}
 	dir = filepath.Clean(dir)
-	
+
 	// the realfile was modified by the last command
 	if strings.HasSuffix(file, ".gorf") {
 		realfile := file[1:len(file)-len(".gorf")]
@@ -38,7 +40,7 @@ func (this undoscanner) VisitFile(fpath string, f *os.FileInfo) {
 		os.Remove(fpath)
 		return
 	}
-	
+
 	// the realfile was created by the last command
 	if strings.HasSuffix(file, ".gorfn") {
 		realfile := file[1:len(file)-len(".gorfn")]

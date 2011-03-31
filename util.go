@@ -1,88 +1,62 @@
 package main
 
 import (
-	"fmt"
-	"path/filepath"
-	"go/ast"
-	"go/token"
+	"strings"
 	"unicode"
 	"utf8"
+	"go/ast"
+	"fmt"
+	"rog-go.googlecode.com/hg/exp/go/types"
 )
 
-func IsLegalIdentifier(id string) bool {
-	if len(id) == 0 {
+func IsLegalIdentifier(s string) bool {
+	us := utf8.NewString(s)
+	if !unicode.IsLetter(us.At(0)) {
 		return false
 	}
-	if !unicode.IsLetter(utf8.NewString(id).At(0)) {
-		return false
-	}
-	for _, c := range id[1:] {
-		if !unicode.IsLetter(c) && !unicode.IsDigit(c) {
+	for i, c := range s {
+		if !unicode.IsLetter(c) && (i == 0 || !unicode.IsDigit(c)) {
 			return false
 		}
 	}
 	return true
 }
 
-func QuoteTarget(target string) (qt string) {
-	return fmt.Sprintf("\"%s\"", filepath.Clean(target))
+func QuotePath(path string) (qpath string) {
+	qpath = "\""+path+"\""
+	return
 }
 
-/*
-An ident can be redefined by
-	- a GenDecl
-	- a := assignment
-	- a function's parameter or result name
-*/
-func NodeRedefinesIdent(node ast.Node, ident string, rhsv ast.Visitor) (redefined bool) {
-	switch n := node.(type) {
-	case *ast.AssignStmt:
-		if n.Tok == token.DEFINE {
-			for _, e := range n.Lhs {
-				if id, ok := e.(*ast.Ident); ok {
-					if id.Name == ident {
-						redefined = true
-					}
-				}
-			}
-		}
-		
-		if redefined {
-			for _, rhsx := range n.Rhs {
-				ast.Walk(rhsv, rhsx)
-			}
-		}
-		
-	case *ast.FuncType:
-		if n.Params != nil {
-			for _, param := range n.Params.List {
-				for _, name := range (*param).Names {
-					if name.Name == ident {
-						redefined = true
-					}
-				}
-			}
-		}
-		if n.Results != nil {
-			for _, result := range n.Results.List {
-				for _, name := range (*result).Names {
-					if name.Name == ident {
-						redefined = true
-					}
-				}		
-			}
-		}
-	
-	case *ast.GenDecl:
-		for _, spec := range n.Specs {
-			if vs, ok := spec.(*ast.ValueSpec); ok {
-				for _, id := range vs.Names {
-					if id.Name == ident {
-						redefined = true
-					}
-				}
-			}
-		}
-	}
+func TrimPath(path string) (tpath string) {
+	tpath = strings.Trim(path, "\"")
 	return
+}
+
+
+type DepthWalker int
+
+func (this DepthWalker) Visit(node ast.Node) ast.Visitor {
+	if node == nil {
+		return this+1
+	}
+	
+	buffer := ""
+	for i:=0;i<int(this); i++ {
+		buffer += " "
+	}
+	
+	fmt.Printf("%s%T\n", buffer, node)
+	fmt.Printf("%s%v\n", buffer, node)
+	if e, ok := node.(ast.Expr); ok {
+		obj, typ := types.ExprType(e, LocalImporter)
+		fmt.Printf("%s%v\n", buffer, obj)
+		fmt.Printf("%s%v\n", buffer, typ)
+	}
+	fmt.Println()
+	
+	switch n := node.(type) {
+	
+	}
+	
+	return this+1
 }
