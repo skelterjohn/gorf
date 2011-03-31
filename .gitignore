@@ -5,3 +5,6 @@ bin
 _go_.6
 gorf
 target.gb
+.project
+testcases
+typelookup

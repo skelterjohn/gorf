@@ -5,18 +5,14 @@ include $(GOROOT)/src/Make.inc
 
 TARG=gorf
 GOFILES=\
-	chpkg.go\
-	func.go\
+	dscan.go\
+	field.go\
+	global.go\
 	gorf.go\
-	ident.go\
-	mvtarget.go\
-	source.go\
-	target.go\
-	type.go\
+	pkg.go\
+	rename.go\
+	rewrite.go\
+	scan.go\
 	undo.go\
-	usage.go\
 	util.go\
-	var.go\
-
 include $(GOROOT)/src/Make.cmd
-
