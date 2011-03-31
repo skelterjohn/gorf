@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"go/ast"
+	"rog-go.googlecode.com/hg/exp/go/types"
 )
 
 type Target struct {
 	Name, Path string
 	Source []string
+	pkg *ast.Package
 }
 
 var (
@@ -78,13 +81,28 @@ func (this scanner) VisitFile(fpath string, f *os.FileInfo) {
 	}
 	
 	importKey := name+":"+dir
-	i, ok := AllTargets[importKey]
+	t, ok := AllTargets[importKey]
 	if !ok {
-		i = new(Target)
-		i.Name, i.Path = name, dir
-		AllTargets[importKey] = i
+		t = new(Target)
+		t.Name, t.Path = name, dir
+		t.pkg = &ast.Package{Name:name, Scope:nil, Files:make(map[string]*ast.File)}
+		AllTargets[importKey] = t
 	}
-	i.Source = append(i.Source, file)
+	t.Source = append(t.Source, file)
+	t.pkg.Files[fpath] = AllSources[fpath]
 	
-	GetDirTargets(dir)[name] = i
+	GetDirTargets(dir)[name] = t
+}
+
+func LocalImporter(path string) *ast.Package {
+	dirTargets := GetDirTargets(path)
+	if dirTargets == nil {
+		return types.DefaultImporter(path)
+	}
+	for k, t := range dirTargets {
+		if k != "main" {
+			return t.pkg
+		}
+	}
+	return nil
 }

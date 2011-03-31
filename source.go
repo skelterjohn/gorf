@@ -9,15 +9,19 @@ import (
 	"go/parser"
 	"go/token"
 	"go/printer"
+	//"gonicetrace.googlecode.com/hg/nicetrace"
+	"rog-go.googlecode.com/hg/exp/go/types"
 )
 
 var (
 	AllSources = make(map[string]*ast.File)
+	AllPackages = make(map[string]*ast.Package)
+	FileSet = token.NewFileSet()
 )
 
 func ParseSource(fpath string) (err os.Error) {
 	var ft *ast.File
-	ft, err = parser.ParseFile(token.NewFileSet(), fpath, nil, 0)
+	ft, err = parser.ParseFile(FileSet, fpath, nil, 0)
 	if err != nil {
 		return
 	}
@@ -86,24 +90,56 @@ func GetSourcePackageName(filepath string) (name string, err os.Error) {
 		err = os.NewError("no such source: "+filepath)
 		return
 	}
-	w := &GetPackageWalker{}
 
-	ast.Walk(w, ft)
+	name = ft.Name.Name
 	
-	name = w.name
+	//ast.Walk(DepthWalker(0), ft)
 	
 	return
 }
 
-type GetPackageWalker struct {
-	name string
+type DepthWalker int
+
+func (d DepthWalker) Visit(node ast.Node) ast.Visitor {
+	buffer := ""
+	for i:=0; i<int(d); i++ {
+		buffer += " "
+	}
+	if node != nil {
+		fmt.Printf("%s%T\n", buffer, node)
+		fmt.Printf("%s %v\n", buffer, node)
+		if e, ok := node.(ast.Expr); ok && e != nil {		
+			obj, typ := types.ExprType(e, types.DefaultImporter)
+			fmt.Printf("%styp %v\n", buffer, typ)
+			if obj != nil {
+				fmt.Printf("%sobj: %v\n", buffer, obj)
+				fmt.Printf("%sobj.Decl: %T %v\n", buffer, obj.Decl, obj.Decl)
+				switch d := obj.Decl.(type) {
+				
+				}
+			}
+			fmt.Println()
+		}
+	}
+	
+	return d+1
 }
 
-func (w *GetPackageWalker) Visit(node ast.Node) (v ast.Visitor) {
-	switch n := node.(type) {
-	case *ast.File:
-		w.name = n.Name.Name
-		return nil
+/*
+	//defer nicetrace.Print()
+	if node != nil {
+		if e, ok := node.(ast.Expr); ok && e != nil {
+			fmt.Printf("%T\n%v\n", node, node)
+			obj, typ := types.ExprType(e, types.DefaultImporter)
+			fmt.Printf("typ %v\n", typ)
+			if obj != nil {
+				fmt.Printf("obj: %T %v\n", obj, obj)
+				fmt.Printf("obj.Decl: %T %v\n", obj.Decl, obj.Decl)
+				switch d := obj.Decl.(type) {
+				
+				}
+			}
+			fmt.Println()
+		}
 	}
-	return w
-}
+*/

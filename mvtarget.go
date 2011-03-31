@@ -91,7 +91,7 @@ func (w *ImportPathChanger) Visit(node ast.Node) (v ast.Visitor) {
 	switch n := node.(type) {
 	case *ast.ImportSpec:
 		if string(n.Path.Value) == QuoteTarget(w.old) {
-			n.Path.Value = []byte(QuoteTarget(w.new))
+			n.Path.Value = QuoteTarget(w.new)
 			w.changed = true
 			return nil
 		}

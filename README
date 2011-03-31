@@ -14,6 +14,7 @@ commands:
  const <target> <package> <old name> <new name>
  type <target> <package> <old name> <new name>
  //field <target> <package> <type> <old name> <new name>
+ //merge <target> <disappearing package> <remaining package> 
  undo
 
 A target is the import path. Targets and relative paths to package
