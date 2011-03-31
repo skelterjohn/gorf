@@ -2,32 +2,16 @@ DO NOT RUN THIS ON IMPORTANT CODE
 
 IT WILL REWRITE YOUR CODE WITH NO GUARANTEE OF CORRECTNESS
 
-To test, go to testcases and run one of the run_* scripts.
-
-Usage: gorf <command>
-
+Usage: gorf [flags] <command>
 commands:
- target <old target> <new target>
- package <target> <old name> <new name>
- func <target> <package> <old name> <new name>
- var <target> <package> <old name> <new name>
- const <target> <package> <old name> <new name>
- type <target> <package> <old name> <new name>
- //field <target> <package> <type> <old name> <new name>
- //merge <target> <disappearing package> <remaining package> 
- undo
-
-A target is the import path. Targets and relative paths to package
-directories need to match.
-
-Relative paths are not noticed (yet)
-
-gorf will consider all source visible in subdirectories from the CWD to
-be fair game.
-
-If a particular global or type is defined in multiple source files, gorf
-will act on all of them individually, trusting the builder to know to not
-compile them together.
-
-The field-name refactorer will have to wait until the go/typechecker
-package is finished.
+  scan <path>
+  pkg <path> <old name> <new name>
+  var <path> <old name> <new name>
+  const <path> <old name> <new name>
+  type <path> <old name> <new name>
+  func <path> <old name> <new name>
+  field <path> <type name> <old field name> <new field name>
+  undo
+flags
+  -?=false: Print usage and quit
+  -r=".": Local package root
