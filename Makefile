@@ -15,4 +15,5 @@ GOFILES=\
 	scan.go\
 	undo.go\
 	util.go\
+
 include $(GOROOT)/src/Make.cmd
