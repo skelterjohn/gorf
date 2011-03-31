@@ -14,8 +14,13 @@ var (
 
 var UsageText = `Usage: gorf [flags] <command>
 commands:
-  var <path> [package] <old name> <new name>
+  scan <path>
   pkg <path> <old name> <new name>
+  var <path> <old name> <new name>
+  const <path> <old name> <new name>
+  type <path> <old name> <new name>
+  func <path> <old name> <new name>
+  field <path> <type name> <old field name> <new field name>
   undo
 `
 
@@ -43,6 +48,10 @@ func main() {
 	}
 	
 	foo, ok := cmds[flag.Arg(0)]
+	if ok && Usage {
+		fmt.Println(Help(flag.Arg(0)))
+		return
+	}
 
 	erf := func(format string, args ...interface{}) {
 		fmt.Fprintf(os.Stderr, format, args...)
