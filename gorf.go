@@ -20,11 +20,7 @@ var UsageText = `Usage: gorf [flags] <command>
 commands:
   scan <path>
   pkg <path> <old name> <new name>
-  var <path> <old name> <new name>
-  const <path> <old name> <new name>
-  type <path> <old name> <new name>
-  func <path> <old name> <new name>
-  field <path> <type name> <old field name> <new field name>
+  rename <path> [type.]<old name> <new name>
   undo
 `
 
@@ -43,11 +39,7 @@ func main() {
 	cmds := map[string]func([]string) os.Error {
 		"undo" : UndoCmd,
 		"pkg" : PkgCmd,
-		"var" : VarCmd,
-		"const" : ConstCmd,
-		"func" : FuncCmd,
-		"type" : TypeCmd,
-		"field" : FieldCmd,
+		"rename" : RenameCmd,
 		"scan" : ScanCmd,
 	}
 	
