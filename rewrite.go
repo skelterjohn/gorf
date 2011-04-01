@@ -61,6 +61,12 @@ func MoveSource(oldpath, newpath string) (err os.Error) {
 	}
 	Touch(filepath.Join(dir, "."+file+".gorfn"))
 	err = Copy(oldpath, newpath)
+	if err != nil {
+		return
+	}
+	
+	err = os.Remove(oldpath)
+	
 	return
 }
 

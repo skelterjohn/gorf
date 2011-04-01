@@ -101,9 +101,7 @@ func (this *DeclFinder) Visit(node ast.Node) ast.Visitor {
 				return nil
 			}
 		}
-		
 		return nil
-	
 	case *ast.FuncDecl:
 		if n.Name.Name == this.newname {
 			this.NameExists = true
@@ -113,7 +111,6 @@ func (this *DeclFinder) Visit(node ast.Node) ast.Visitor {
 			this.Obj, _ = types.ExprType(n.Name, LocalImporter)
 		}
 		return nil
-
 	case *ast.TypeSpec:
 		if n.Name.Name == this.newname {
 			this.NameExists = true

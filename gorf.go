@@ -21,6 +21,7 @@ commands:
   scan <path>
   pkg <path> <old name> <new name>
   rename <path> [type.]<old name> <new name>
+  move <path> <newpath> [<name>]
   undo
 `
 
@@ -40,6 +41,7 @@ func main() {
 		"undo" : UndoCmd,
 		"pkg" : PkgCmd,
 		"rename" : RenameCmd,
+		"move" : MoveCmd,
 		"scan" : ScanCmd,
 	}
 	
