@@ -106,8 +106,6 @@ func (this *PkgChanger) Visit(node ast.Node) ast.Visitor {
 			if n.Name != nil {
 				if n.Name.Name == this.oldname {
 					n.Name.Name = this.newname
-					
-					println(this.newname)
 					this.Updated = true
 				} else {
 					this.Renamed = true

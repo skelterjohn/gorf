@@ -1,0 +1,10 @@
+rm -r localroot_tmp
+cp -r localroot localroot_tmp
+cd localroot_tmp
+
+gorf move package1 pkg1
+gorf pkg pkg1 package1 pkg1
+
+cd - > /dev/null
+
+diff -r localroot_tmp localroot_test1
