@@ -1,8 +1,0 @@
-rm -rf test
-cp -r testdata test
-cd test
-gorf var place place X XX
-gorf var place place Z ZZ
-cd -
-diff -r test testvarres
-

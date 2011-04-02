@@ -1,7 +1,0 @@
-rm -rf test
-cp -r testdata test
-cd test
-gorf target place place2
-gorf package place2 place place2
-cd -
-diff -r test testpkgres

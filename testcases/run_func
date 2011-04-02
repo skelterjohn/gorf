@@ -1,6 +1,0 @@
-rm -rf test
-cp -r testdata test
-cd test
-gorf func place place Bar Baz
-cd -
-diff -r test testfuncres
