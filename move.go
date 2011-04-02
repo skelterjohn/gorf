@@ -379,10 +379,19 @@ func MoveSingle(oldpath, newpath string, names []string) (err os.Error) {
 				}
 			default:
 				return MakeErr("Unanticipated parent type: %T", pn)
-			}
-			
+			}	
 		}
 		
+		//strip out imports that are unnecessary because things are no longer here
+		if removedStuff {
+			for _, file := range pkg.Files {
+				iuc := make(ImportUseCollector)
+				ast.Walk(iuc, file)
+				
+				ast.Walk(ImportFilterWalker(iuc), file)
+			}
+		}
+				
 		//if this file refernces things that are moving, import the new package
 		if len(urw.GoodReferenceParents) != 0 {
 			if referenceBack {
@@ -443,9 +452,14 @@ func MoveSingle(oldpath, newpath string, names []string) (err os.Error) {
 							}
 						}
 					}
+				case *ast.StarExpr:
+					if p.X == node {
+						if idn, ok := p.X.(*ast.Ident); ok {
+							p.X = getSel(idn)
+						}
+					}
 				default:
-					printer.Fprint(os.Stdout, AllSources, parent)
-					return MakeErr("Unexpected parent %T\n", parent)
+					return MakeErr("Unexpected local parent %T\n", parent)
 				}
 			}
 		}
@@ -497,12 +511,16 @@ func MoveSingle(oldpath, newpath string, names []string) (err os.Error) {
 			
 			for node, parent := range rw.GoodReferenceParents {
 				getSel := func(sel *ast.SelectorExpr) *ast.SelectorExpr {
-					return &ast.SelectorExpr {
-						X : &ast.Ident {
-							Name : newpkgname,
-						},
-						Sel : sel.Sel,
+					obj, _ := types.ExprType(sel.X, LocalImporter)
+					if obj.Kind == ast.Pkg {
+						return &ast.SelectorExpr {
+							X : &ast.Ident {
+								Name : newpkgname,
+							},
+							Sel : sel.Sel,
+						}
 					}
+					return sel
 				}
 				
 				switch p := parent.(type) {
@@ -542,12 +560,15 @@ func MoveSingle(oldpath, newpath string, names []string) (err os.Error) {
 							}
 						}
 					}
-					
-					
+				case *ast.StarExpr:
+					if p.X == node {
+						if sel, ok := p.X.(*ast.SelectorExpr); ok {
+							p.X = getSel(sel)
+						}
+					}
 				default:
 					printer.Fprint(os.Stdout, AllSources, parent)
-					fmt.Println()
-					return MakeErr("Unexpected parent %T\n", parent)
+					return MakeErr("Unexpected remote parent %T\n", parent)
 				}
 			}
 			
@@ -611,6 +632,47 @@ func (this *ImportRemover) Visit(node ast.Node) ast.Visitor {
 		Parent : node,
 		Path : this.Path,
 	}
+}
+
+type ImportUseCollector map[*ast.ImportSpec]bool
+
+func (this ImportUseCollector) Visit(node ast.Node) ast.Visitor {
+	if _, ok := node.(*ast.ImportSpec); ok {
+		return nil
+	}
+
+	if expr, ok := node.(ast.Expr); ok {
+		_, typ := types.ExprType(expr, LocalImporter)
+		if typ.Node != node {
+			if is, ok2 := typ.Node.(*ast.ImportSpec); ok2 {
+				this[is] = true
+			}
+		}
+	}
+	
+	return this
+}
+
+type ImportFilterWalker ImportUseCollector
+func (this ImportFilterWalker) Visit(node ast.Node) ast.Visitor {
+	if gdl, ok := node.(*ast.GenDecl); ok {
+		var newspecs []ast.Spec 
+		for _, spec := range gdl.Specs {
+			if is, ok2 := spec.(*ast.ImportSpec); ok2 {
+				if !this[is] {
+					continue
+				}
+			}
+			newspecs = append(newspecs, spec)
+		}
+		gdl.Specs = newspecs
+	}
+	
+	if _, ok := node.(*ast.BlockStmt); ok {
+		return nil
+	}
+	
+	return this
 }
 
 type ObjChecker struct {
@@ -736,6 +798,9 @@ func (this *MethodFinder) Visit(node ast.Node) ast.Visitor {
 		if n.Recv != nil {
 			for _, field := range n.Recv.List {
 				expr := field.Type
+				if se, ok := expr.(*ast.StarExpr); ok {
+					expr = se.X
+				}
 				obj, _ := types.ExprType(expr, LocalImporter)
 				if obj == this.Receiver {
 					fobj, _ := types.ExprType(n.Name, LocalImporter)

@@ -7,4 +7,4 @@ gorf pkg pkg1 package1 pkg1
 
 cd - > /dev/null
 
-diff -r localroot_tmp localroot_test1
+diff -r localroot_tmp test1_localroot

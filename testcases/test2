@@ -1,0 +1,9 @@
+rm -r localroot_tmp
+cp -r localroot localroot_tmp
+cd localroot_tmp
+
+gorf move pkg2 pkg2/T T
+
+cd - > /dev/null
+
+diff -r localroot_tmp test2_localroot

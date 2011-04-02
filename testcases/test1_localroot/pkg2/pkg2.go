@@ -17,3 +17,6 @@ func (t *T) Foo() {
 func (t *T) Bar() {
 	Bar()
 }
+func Baz() {
+	fmt.Println("pkg2::Baz")
+}
