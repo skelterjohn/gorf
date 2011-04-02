@@ -49,7 +49,7 @@ func main() {
 	
 	foo, ok := cmds[flag.Arg(0)]
 	if ok && Usage {
-		fmt.Println(Help(flag.Arg(0)))
+		fmt.Print(Help(flag.Arg(0)))
 		return
 	}
 

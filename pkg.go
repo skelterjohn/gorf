@@ -39,11 +39,11 @@ func PkgCmd(args []string) (err os.Error) {
 		}
 	}()
 	
-	pkg := LocalImporter(path)
-	
-	if pkg == nil {
-		return MakeErr("No package found in %s", path)
+	if PackageTops[path] == nil {
+		return MakeErr("No local package found in %s", path)
 	}
+	
+	pkg := LocalImporter(path)
 	
 	if pkg.Name != oldname {
 		return MakeErr("Package name and old name don't match (%s != %s)", pkg.Name, oldname)

@@ -34,15 +34,15 @@ func MoveCmd(args []string) (err os.Error) {
 		}
 	}()
 	
+	if PackageTops[oldpath] == nil {
+		return MakeErr("Old path %s has no local package", oldpath)
+	}
+	
 	if PackageTops[newpath] != nil {
 		return MakeErr("New path %s already has a package (did you mean to merge?)", newpath)
 	}
 	
 	pkg := LocalImporter(oldpath)
-	
-	if pkg == nil {
-		return MakeErr("Old path %s has no package", oldpath)
-	}
 
 	if len(args) >= 3 {
 		err = MoveSingle(oldpath, newpath, args[2:])

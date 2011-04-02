@@ -42,11 +42,12 @@ func RenameCmd(args []string) (err os.Error) {
 		}
 	}()
 	
+	if PackageTops[path] == nil {
+		return MakeErr("No local package found in %s", path)
+	}
+	
 	pkg := LocalImporter(path)
 	
-	if pkg == nil {
-		return MakeErr("No package found in %s", path)
-	}
 	
 	updated := false
 	

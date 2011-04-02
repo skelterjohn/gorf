@@ -14,23 +14,23 @@ func MergeCmd(args []string) (err os.Error) {
 
 	oldpath, newpath := args[0], args[1]
 	
+	err = ScanAllForImports(LocalRoot)
+	if err != nil {
+		return
+	}
+	
 	defer func() {
 		if err != nil {
 			 UndoCmd([]string{})
 		}
 	}()
 	
-	err = ScanAllForImports(LocalRoot)
-	if err != nil {
-		return
-	}
-	
 	if PackageTops[oldpath] == nil {
-		return MakeErr("Old path '%s' contains no package", oldpath)
+		return MakeErr("Old path %s has no local package", oldpath)
 	}
 	
 	if PackageTops[newpath] == nil {
-		return MakeErr("Old path '%s' contains no package", newpath)
+		return MakeErr("New path %s has no local package", newpath)
 	}
 	
 	oldpkg, newpkg := LocalImporter(oldpath), LocalImporter(newpath)

@@ -18,25 +18,17 @@ func Help(cmd string) string {
 		return `Usage: gorf [flags] pkg <path> <old name> <new name>
 	"pkg" will change the name of the package in the specified path.
 `
-	case "var":
-		return `Usage: gorf [flags] var <path> <old name> <new name>
-	"var" will change the name of a top-level var in the package in the specified path.
+	case "rename":
+		return `Usage: gorf [flags] rename <path> [<type>.]<old name> <new name>
+	"rename" will change the name of a top-level decleration in the package in the specified path.
 `
-	case "const":
-		return `Usage: gorf [flags] const <path> <old name> <new name>
-	"const" will change the name of a top-level const in the package in the specified path.
+	case "move":
+		return `Usage: gorf [flags] move <old path> <new path> [<name>+]
+	"move" will move a package, or (if names are specified) a subset of a package.
 `
-	case "func":
-		return `Usage: gorf [flags] func <path> <old name> <new name>
-	"func" will change the name of a functino in the package in the specified path.
-`
-	case "type":
-		return `Usage: gorf [flags] type <path> <old name> <new name>
-	"func" will change the name of a type in the package in the specified path.
-`
-	case "field":
-		return `Usage: gorf [flags] field <path> <struct name> <old field name> <new field name>
-	"field" will change the name of a struct's field in the package in the specified path.
+	case "merge":
+		return `Usage: gorf [flags] merge <old path> <new path>
+	"merge" will merge two packages.
 `
 	}
 	return "Unknown cmd: "+cmd
