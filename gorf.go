@@ -21,7 +21,7 @@ commands:
   scan <path>
   pkg <path> <old name> <new name>
   rename <path> [type.]<old name> <new name>
-  move <old path> <new path> [<name>]
+  move <old path> <new path> [<name>+]
   merge <old path> <new path>
   undo
 `

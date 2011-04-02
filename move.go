@@ -13,8 +13,8 @@ import (
 )
 
 func MoveCmd(args []string) (err os.Error) {
-	if len(args) != 3 && len(args) != 2 {
-		return MakeErr("Usage: gorf [flags] move <old path> <new path> [<name>]")
+	if len(args) < 2 {
+		return MakeErr("Usage: gorf [flags] move <old path> <new path> [<name>+]")
 	}
 	
 	oldpath, newpath := args[0], args[1]
@@ -41,9 +41,8 @@ func MoveCmd(args []string) (err os.Error) {
 		return MakeErr("Old path %s has no package", oldpath)
 	}
 
-	if len(args) == 3 {
-		name := args[2]
-		err = MoveSingle(oldpath, newpath, name)
+	if len(args) >= 3 {
+		err = MoveSingle(oldpath, newpath, args[2:])
 		return
 	}
 	
@@ -93,9 +92,11 @@ func (this *PathChangeWalker) Visit(node ast.Node) ast.Visitor {
 	return this
 }
 
-func MoveSingle(oldpath, newpath, name string) (err os.Error) {
-	if !IsLegalIdentifier(name) {
-		return MakeErr("Name %s is not a legal identifier", name)
+func MoveSingle(oldpath, newpath string, names []string) (err os.Error) {
+	for _, name := range names {
+		if !IsLegalIdentifier(name) {
+			return MakeErr("Name %s is not a legal identifier", name)
+		}
 	}
 	
 	pkg := LocalImporter(oldpath)
@@ -108,24 +109,33 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 	ast.Walk(allObjs, pkg)
 	
 	//find the nodes we want to move
-	for _, file := range pkg.Files {
-		fdl := DeclFinder{oldname:name}
-		ast.Walk(&fdl, file)
-		if fdl.Obj != nil {
-			moveObjs[fdl.Obj] = fdl.Node
-			moveNodes[fdl.Node] = fdl.Obj
+	for _, name := range names {
+		found := false
+		for _, file := range pkg.Files {
+			fdl := DeclFinder{oldname:name}
+			ast.Walk(&fdl, file)
+			if fdl.Obj != nil {
+				found = true
 			
-			mf := MethodFinder {
-				Receiver : fdl.Obj,
-				NodeObjs : make(map[ast.Node]*ast.Object),
+				moveObjs[fdl.Obj] = fdl.Node
+				moveNodes[fdl.Node] = fdl.Obj
+				
+				mf := MethodFinder {
+					Receiver : fdl.Obj,
+					NodeObjs : make(map[ast.Node]*ast.Object),
+				}
+				
+				ast.Walk(&mf, pkg)
+				
+				for node, obj := range mf.NodeObjs {
+					moveObjs[obj] = node
+					moveNodes[node] = obj
+				}
 			}
-			
-			ast.Walk(&mf, pkg)
-			
-			for node, obj := range mf.NodeObjs {
-				moveObjs[obj] = node
-				moveNodes[node] = obj
-			}
+		}
+		
+		if !found {
+			return MakeErr("Unable to find %s in '%s'", name, oldpath)
 		}
 	}
 
@@ -134,10 +144,6 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 		if _, ok := moveObjs[obj]; !ok {
 			remainingObjs[obj] = true
 		}
-	}
-	
-	if len(moveNodes) == 0 {
-		return MakeErr("Unable to find %s in '%s'", name, oldpath)
 	}
 	
 	
@@ -317,7 +323,7 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 		ast.Walk(&urw, file)
 		
 		if len(*urw.BadReferences) != 0 {
-			fmt.Printf("Cannot move %s:\n", name)
+			fmt.Printf("Cannot move %v:\n", names)
 			for node := range moveNodes {
 				printer.Fprint(os.Stdout, token.NewFileSet(), node)
 				fmt.Println()
@@ -329,7 +335,7 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 				printer.Fprint(os.Stdout, token.NewFileSet(), node)
 				fmt.Println()
 			}
-			return MakeErr("%s in '%s' contains unexported objects referenced elsewhere in the package", name, oldpath)
+			return MakeErr("%v in '%s' contains unexported objects referenced elsewhere in the package", names, oldpath)
 		}
 		
 		removedStuff := false
@@ -373,7 +379,7 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 		//if this file refernces things that are moving, import the new package
 		if len(urw.GoodReferenceParents) != 0 {
 			if referenceBack {
-				return MakeErr("Moving %s from %s would create a cycle", name, oldpath)
+				return MakeErr("Moving %v from %s would create a cycle", names, oldpath)
 			}
 		
 			newpkgname := GetUniqueIdent([]*ast.File{file}, pkg.Name)
