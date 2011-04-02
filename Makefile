@@ -7,14 +7,15 @@ TARG=gorf
 GOFILES=\
 	dscan.go\
 	field.go\
-	global.go\
 	gorf.go\
+	help.go\
+	merge.go\
+	move.go\
 	pkg.go\
 	rename.go\
-	rewrite.go\
 	scan.go\
+	source.go\
 	undo.go\
 	util.go\
-	help.go\
 
 include $(GOROOT)/src/Make.cmd
