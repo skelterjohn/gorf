@@ -27,7 +27,7 @@ func IsLegalIdentifier(s string) bool {
 }
 
 func QuotePath(path string) (qpath string) {
-	qpath = "\""+path+"\""
+	qpath = "\""+filepath.Clean(path)+"\""
 	return
 }
 

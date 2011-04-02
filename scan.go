@@ -26,6 +26,8 @@ var (
 )
 
 func LocalImporter(path string) (pkg *ast.Package) {
+	path = filepath.Clean(path)
+	
 	//fmt.Printf("Importing %s\n", path)
 	var ok bool
 	var pkgtop *ast.Package
@@ -111,6 +113,12 @@ func ScanForImports(path string) (err os.Error) {
 	
 	if v, ok := is["."]; !v && ok {
 		return MakeErr("gorf can not deal with unnamed import in '%s'", path)
+	}
+	
+	for path, _ := range is {
+		if strings.HasPrefix(path, ".") {
+			return MakeErr("gorf can not deal with relative import in '%s'", path)
+		}
 	}
 	
 	for imp := range is {
