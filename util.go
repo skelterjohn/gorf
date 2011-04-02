@@ -9,6 +9,7 @@ import (
 	"unicode"
 	"utf8"
 	"go/ast"
+	"path/filepath"
 	"fmt"
 	"rog-go.googlecode.com/hg/exp/go/types"
 )
@@ -74,6 +75,18 @@ func GetUniqueIdent(files []*ast.File, candidate string) (id string) {
 	id = candidate
 	for i:=0; ic[id]; i++ {
 		id = fmt.Sprintf("%s_%d", candidate, i)
+	}
+	
+	return
+}
+
+func GetUniqueFilename(pkg *ast.Package, candidate string) (fname string) {
+	ext := filepath.Ext(candidate)
+	base := candidate[:len(candidate)-len(ext)]
+
+	fname = candidate
+	for i:=0; pkg.Files[fname] != nil; i++ {
+		fname = fmt.Sprintf("%s_%d%s", base, i, ext)
 	}
 	
 	return

@@ -29,7 +29,10 @@ func FieldCmd(args []string) (err os.Error) {
 		return MakeErr("Old name and new name are the same")
 	}
 	
-	ScanAllForImports(LocalRoot)
+	err = ScanAllForImports(LocalRoot)
+	if err != nil {
+		return
+	}
 	
 	defer func() {
 		if err != nil {

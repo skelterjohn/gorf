@@ -43,6 +43,7 @@ func main() {
 		"pkg" : PkgCmd,
 		"rename" : RenameCmd,
 		"move" : MoveCmd,
+		"merge" : MergeCmd,
 		"scan" : ScanCmd,
 	}
 	

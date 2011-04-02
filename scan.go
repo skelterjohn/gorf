@@ -76,7 +76,7 @@ func (s *ScanWalker) VisitDir(path string, f *os.FileInfo) bool {
 }
 
 func (s *ScanWalker) VisitFile(fpath string, f *os.FileInfo) {
-	if strings.HasSuffix(fpath, ".gorg") || strings.HasSuffix(fpath, ".ngorg") {
+	if strings.HasSuffix(fpath, ".gorf") || strings.HasSuffix(fpath, ".gorfn") {
 		os.Remove(fpath)
 	}
 }
