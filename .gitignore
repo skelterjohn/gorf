@@ -8,3 +8,4 @@ target.gb
 .project
 testcases
 typelookup
+.goinstall

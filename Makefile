@@ -19,3 +19,11 @@ GOFILES=\
 	util.go\
 
 include $(GOROOT)/src/Make.cmd
+
+$(TARG): .goinstall
+
+.goinstall:
+	goinstall gonicetrace.googlecode.com/hg/nicetrace && \
+	goinstall rog-go.googlecode.com/hg/exp/go/types && \
+	goinstall rog-go.googlecode.com/hg/exp/go/parser && \
+	touch .goinstall
