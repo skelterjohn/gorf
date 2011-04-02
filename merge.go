@@ -9,7 +9,5 @@ func MergeCmd(args []string) (err os.Error) {
 		return MakeErr("Usage: gorf [flags] merge <old path> <new path>")
 	}
 
-	
-
-	return
+	return MakeErr("not implemented yet")
 }

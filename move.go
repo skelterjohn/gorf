@@ -23,7 +23,10 @@ func MoveCmd(args []string) (err os.Error) {
 		return MakeErr("Old path and new path are the same")
 	}
 	
-	ScanAllForImports(LocalRoot)
+	err = ScanAllForImports(LocalRoot)
+	if err != nil {
+		return
+	}
 	
 	defer func() {
 		if err != nil {

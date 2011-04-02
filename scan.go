@@ -56,25 +56,33 @@ func LocalImporter(path string) (pkg *ast.Package) {
 	return
 }
 
-func ScanAllForImports(dir string) {
-	filepath.Walk(dir, ScanWalker(0), nil)
+func ScanAllForImports(dir string) (err os.Error) {
+	sw := ScanWalker{}
+	filepath.Walk(dir, &sw, nil)
+	err = sw.err
+	return
 }
 
-type ScanWalker int
+type ScanWalker struct {
+	err os.Error
+}
 
-func (s ScanWalker) VisitDir(path string, f *os.FileInfo) bool {
-	ScanForImports(path)
+func (s *ScanWalker) VisitDir(path string, f *os.FileInfo) bool {
+	err := ScanForImports(path)
+	if err != nil {
+		s.err = err
+	}
 	return true
 }
 
-func (s ScanWalker) VisitFile(fpath string, f *os.FileInfo) {
+func (s *ScanWalker) VisitFile(fpath string, f *os.FileInfo) {
 	if strings.HasSuffix(fpath, ".gorg") || strings.HasSuffix(fpath, ".ngorg") {
 		os.Remove(fpath)
 	}
 }
 
 //Look at the imports, and build up ImportedBy
-func ScanForImports(path string) {
+func ScanForImports(path string) (err os.Error) {
 	sourcefiles := filepath.Glob(filepath.Join(path, "*.go"))
 	dirpkgs, err := parser.ParseFiles(AllSourceTops, sourcefiles, parser.ImportsOnly)
 	
@@ -101,6 +109,10 @@ func ScanForImports(path string) {
 	
 	ast.Walk(is, prime)
 	
+	if v, ok := is["."]; !v && ok {
+		return MakeErr("gorf can not deal with unnamed import in '%s'", path)
+	}
+	
 	for imp := range is {
 		ImportedBy[imp] = append(ImportedBy[imp], path)
 	}
@@ -113,6 +125,9 @@ type ImportScanner map[string]bool
 func (is ImportScanner) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.ImportSpec:
+		if n.Name.Name == "." {
+			is["."] = false
+		}
 		is[string(n.Path.Value)] = true
 	}
 	return is
