@@ -64,3 +64,26 @@ func (this DepthWalker) Visit(node ast.Node) ast.Visitor {
 	
 	return this+1
 }
+
+func GetUniqueIdent(files []*ast.File, candidate string) (id string) {
+	ic := make(IdentCollector)
+	for _, file := range files {
+		ast.Walk(ic, file)
+	}
+	
+	id = candidate
+	for i:=0; ic[id]; i++ {
+		id = fmt.Sprintf("%s_%d", candidate, i)
+	}
+	
+	return
+}
+
+type IdentCollector map[string]bool
+
+func (this IdentCollector) Visit(node ast.Node) ast.Visitor {
+	if ident, ok := node.(*ast.Ident); ok {
+		this[ident.Name] = true
+	}
+	return this
+}

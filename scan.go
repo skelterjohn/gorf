@@ -8,13 +8,13 @@ import (
 	"os"
 	//"fmt"
 	"go/token"
-	//"go/parser"
 	"go/ast"
 	"path/filepath"
 	"log"
 	"strings"
 	"rog-go.googlecode.com/hg/exp/go/types"
 	"rog-go.googlecode.com/hg/exp/go/parser"
+	//"go/parser"
 )
 
 var (

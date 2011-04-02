@@ -41,31 +41,59 @@ func BackupSource(fpath string) (err os.Error) {
 	return
 }
 
-func Touch(fpath string) {
-	f, _ := os.Open(fpath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
+func Touch(fpath string) (err os.Error) {
+	f, err := os.Open(fpath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
 	f.Close()
+	return
 }
 
 func MoveSource(oldpath, newpath string) (err os.Error) {
 	if _, e := os.Stat(newpath); e == nil {
 		BackupSource(newpath)
 	}
+	
 	err = BackupSource(oldpath)
 	if err != nil {
 		return
 	}
+	
 	dir, file := filepath.Split(newpath)
+	
 	err = os.MkdirAll(dir, 0755)
 	if err != nil {
 		return
 	}
-	Touch(filepath.Join(dir, "."+file+".gorfn"))
+	
+	err = Touch(filepath.Join(dir, "."+file+".gorfn"))
+	if err != nil {
+		return
+	}
+	
 	err = Copy(oldpath, newpath)
 	if err != nil {
 		return
 	}
 	
 	err = os.Remove(oldpath)
+	
+	return
+}
+
+func NewSource(fpath string, file *ast.File) (err os.Error) {
+	dir, name := filepath.Split(fpath)
+	
+	err = Touch(filepath.Join(dir, "."+name+".gorfn"))
+	if err != nil {
+		return
+	}
+	
+	var out io.Writer
+	out, err = os.Open(fpath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
+	if err != nil {
+		return
+	}
+	
+	err = printer.Fprint(out, token.NewFileSet(), file)
 	
 	return
 }
@@ -83,5 +111,6 @@ func RewriteSource(fpath string, file *ast.File) (err os.Error) {
 	}
 	
 	err = printer.Fprint(out, token.NewFileSet(), file)
+	
 	return
 }

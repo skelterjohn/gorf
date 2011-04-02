@@ -79,6 +79,7 @@ type DeclFinder struct {
 	oldname, newname string
 	NameExists bool
 	Obj *ast.Object
+	Node ast.Node
 	Name *ast.Ident
 }
 
@@ -98,6 +99,7 @@ func (this *DeclFinder) Visit(node ast.Node) ast.Visitor {
 			if name.Name == this.oldname {
 				//this.Name = name
 				this.Obj, _ = types.ExprType(name, LocalImporter)
+				this.Node = node
 				return nil
 			}
 		}
@@ -108,6 +110,7 @@ func (this *DeclFinder) Visit(node ast.Node) ast.Visitor {
 		}
 		if n.Name.Name == this.oldname {
 			//this.Name = n.Name
+			this.Node = node
 			this.Obj, _ = types.ExprType(n.Name, LocalImporter)
 		}
 		return nil
@@ -117,6 +120,7 @@ func (this *DeclFinder) Visit(node ast.Node) ast.Visitor {
 		}
 		if n.Name.Name == this.oldname {
 			//this.Name = n.Name
+			this.Node = node
 			this.Obj, _ = types.ExprType(n.Name, LocalImporter)
 		}
 		return nil

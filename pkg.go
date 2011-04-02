@@ -5,7 +5,7 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"os"
 	"go/ast"
 	"rog-go.googlecode.com/hg/exp/go/types"
@@ -60,10 +60,16 @@ func PkgCmd(args []string) (err os.Error) {
 	for _, ip := range ImportedBy[QuotePath(path)] {
 		ipkg := LocalImporter(ip)
 		for fpath, file := range ipkg.Files {
+			uniqueName := GetUniqueIdent([]*ast.File{file}, newname)
+			
+			if uniqueName != newname {
+				fmt.Printf("In %s: possible conflict with %s, using %s instead\n", fpath, newname, uniqueName)
+			}
+			
 			pc := PkgChanger{
 				path:path,
 				oldname:oldname,
-				newname:newname,
+				newname:uniqueName,
 			}
 			ast.Walk(&pc, file)
 			if pc.Updated {
@@ -107,9 +113,12 @@ func (this *PkgChanger) Visit(node ast.Node) ast.Visitor {
 	case *ast.Ident:	
 		if n.Name == this.oldname {
 			_, typ := types.ExprType(n, LocalImporter)
-			if typ.Kind == ast.Pkg {
+			if typ.Kind == ast.Pkg && typ.Pkg == this.path {
 				n.Name = this.newname
 				this.Updated = true
+				
+				//obj2, _ := types.ExprType(n, LocalImporter)
+				//fmt.Printf("%v\n%T %v\n", obj, obj2, obj2)
 			}
 		}
 	}
