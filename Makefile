@@ -20,7 +20,7 @@ GOFILES=\
 
 include $(GOROOT)/src/Make.cmd
 
-$(TARG): .goinstall
+_go_.$O: .goinstall
 
 .goinstall:
 	goinstall gonicetrace.googlecode.com/hg/nicetrace && \
