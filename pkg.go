@@ -106,6 +106,8 @@ func (this *PkgChanger) Visit(node ast.Node) ast.Visitor {
 			if n.Name != nil {
 				if n.Name.Name == this.oldname {
 					n.Name.Name = this.newname
+					
+					println(this.newname)
 					this.Updated = true
 				} else {
 					this.Renamed = true
@@ -115,8 +117,8 @@ func (this *PkgChanger) Visit(node ast.Node) ast.Visitor {
 		}
 	case *ast.Ident:	
 		if n.Name == this.oldname {
-			_, typ := types.ExprType(n, LocalImporter)
-			if typ.Kind == ast.Pkg && typ.Pkg == this.path {
+			obj, typ := types.ExprType(n, LocalImporter)
+			if typ.Kind == ast.Pkg && obj.Name == this.oldname {
 				n.Name = this.newname
 				this.Updated = true
 				
