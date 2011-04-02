@@ -107,22 +107,41 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 	
 	ast.Walk(allObjs, pkg)
 	
+	//find the nodes we want to move
 	for _, file := range pkg.Files {
 		fdl := DeclFinder{oldname:name}
 		ast.Walk(&fdl, file)
 		if fdl.Obj != nil {
 			moveObjs[fdl.Obj] = fdl.Node
 			moveNodes[fdl.Node] = fdl.Obj
+			
+			mf := MethodFinder {
+				Receiver : fdl.Obj,
+				NodeObjs : make(map[ast.Node]*ast.Object),
+			}
+			
+			ast.Walk(&mf, pkg)
+			
+			for node, obj := range mf.NodeObjs {
+				moveObjs[obj] = node
+				moveNodes[node] = obj
+			}
 		}
 	}
-	
-	
+
+	remainingObjs := make(map[*ast.Object]bool)
+	for obj := range allObjs {
+		if _, ok := moveObjs[obj]; !ok {
+			remainingObjs[obj] = true
+		}
+	}
 	
 	if len(moveNodes) == 0 {
 		return MakeErr("Unable to find %s in '%s'", name, oldpath)
 	}
 	
-	//find the nodes we want to move
+	
+	// make a list of objs that cannot be referenced from outside the moved nodes
 	for node, obj := range moveNodes {
 		//printer.Fprint(os.Stdout, token.NewFileSet(), node)
 		//fmt.Printf("\n%v %T\n", obj, node)
@@ -174,9 +193,17 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 	}
 	
 	for mn := range moveNodes {
-		if md, ok := mn.(ast.Decl); ok {
-			newfile.Decls = append(newfile.Decls, md)
+		switch m := mn.(type) {
+		case ast.Decl:
+			newfile.Decls = append(newfile.Decls, m)
+		case *ast.TypeSpec:
+			gdl := &ast.GenDecl {
+				Tok : token.TYPE,
+				Specs : []ast.Spec{m},
+			}
+			newfile.Decls = append(newfile.Decls, gdl)
 		}
+		
 	}
 	
 	npf := ExprParentFinder {
@@ -276,13 +303,6 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 		return
 	}
 	
-	/*
-	fmt.Println("unexported:")
-	for ueo, _ := range unexportedObjs {
-		fmt.Printf("%v\n", ueo)
-	}
-	*/
-
 	//identify locations in other pkg source files that need to now change
 	for fpath, file := range pkg.Files {
 	
@@ -312,9 +332,11 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 			return MakeErr("%s in '%s' contains unexported objects referenced elsewhere in the package", name, oldpath)
 		}
 		
+		removedStuff := false
+		
 		// remove the old definitions
 		for node, parent := range urw.SkipNodeParents {
-			
+			removedStuff = true
 			//fmt.Printf("%T %v\n", parent, parent)
 			
 			switch pn := parent.(type) {
@@ -409,11 +431,13 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 						}
 					}
 				default:
+					printer.Fprint(os.Stdout, AllSources, parent)
 					return MakeErr("Unexpected parent %T\n", parent)
 				}
 			}
-			
-			
+		}
+		
+		if removedStuff {
 			err = RewriteSource(fpath, file)
 			if err != nil {
 				return
@@ -423,11 +447,6 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 	}
 	
 	//make changes in packages that import this one
-	
-			
-			//stick it in there
-	
-	
 	for _, path := range ImportedBy[QuotePath(oldpath)] {
 		opkg := LocalImporter(path)
 		
@@ -497,9 +516,35 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 							}
 						}
 					}
+				case *ast.ValueSpec:
+					if node == p.Type {
+						if sel, ok := p.Type.(*ast.SelectorExpr); ok {
+							p.Type = getSel(sel)
+						}
+					}
+					for i, x := range p.Values {
+						if x == node {
+							if sel, ok := x.(*ast.SelectorExpr); ok {
+								p.Values[i] = getSel(sel)
+							}
+						}
+					}
+					
+					
 				default:
+					printer.Fprint(os.Stdout, AllSources, parent)
+					fmt.Println()
 					return MakeErr("Unexpected parent %T\n", parent)
 				}
+			}
+			
+			//now that we've renamed some references, do we still need to import oldpath?
+			oc := ObjChecker {
+				Objs : remainingObjs,
+			}
+			ast.Walk(&oc, file)
+			if !oc.Found {
+				ast.Walk(&ImportRemover{nil, oldpath}, file)
 			}
 			
 			err = RewriteSource(fpath, file)
@@ -520,6 +565,58 @@ func MoveSingle(oldpath, newpath, name string) (err os.Error) {
 	
 	
 	return
+}
+
+type ImportRemover struct {
+	Parent ast.Node
+	Path string
+}
+
+func (this *ImportRemover) Visit(node ast.Node) ast.Visitor {
+	if is, ok := node.(*ast.ImportSpec); ok {
+		if is.Path.Value == QuotePath(this.Path) {
+			switch p := this.Parent.(type) {
+			case *ast.GenDecl:
+				for i, gis := range p.Specs {
+					if gis == is {
+						l := len(p.Specs)
+						if l > 1 {
+							p.Specs[i], p.Specs[l-1] = p.Specs[l-1], p.Specs[i]
+						} else if p.Lparen == 0 {
+							p.Lparen = is.Pos()
+							p.Rparen = is.Pos()
+						}
+						p.Specs = p.Specs[:l-1]
+					}
+				}
+			}
+			return nil
+		}
+	}
+	
+	return &ImportRemover {
+		Parent : node,
+		Path : this.Path,
+	}
+}
+
+type ObjChecker struct {
+	Objs map[*ast.Object]bool
+	Found bool
+}
+
+func (this *ObjChecker) Visit(node ast.Node) ast.Visitor {
+	if this.Found {
+		return nil
+	}
+	if expr, ok := node.(ast.Expr); ok {
+		obj, _ := types.ExprType(expr, LocalImporter)
+		if this.Objs[obj] {
+			this.Found = true
+			return nil
+		}
+	}
+	return this
 }
 
 type ReferenceWalker struct {
@@ -608,6 +705,31 @@ func (this AllDeclFinder) Visit(node ast.Node) ast.Visitor {
 	case *ast.TypeSpec:
 		obj, _ := types.ExprType(n.Name, LocalImporter)
 		this[obj] = node
+		return nil
+	}
+	return this
+}
+
+type MethodFinder struct {
+	Receiver *ast.Object
+	NodeObjs map[ast.Node]*ast.Object
+}
+
+func (this *MethodFinder) Visit(node ast.Node) ast.Visitor {
+	switch n := node.(type) {
+	case *ast.BlockStmt:
+		return nil
+	case *ast.FuncDecl:
+		if n.Recv != nil {
+			for _, field := range n.Recv.List {
+				expr := field.Type
+				obj, _ := types.ExprType(expr, LocalImporter)
+				if obj == this.Receiver {
+					fobj, _ := types.ExprType(n.Name, LocalImporter)
+					this.NodeObjs[n] = fobj
+				}
+			}
+		}
 		return nil
 	}
 	return this
