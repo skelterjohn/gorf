@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"path/filepath"
 	"os"
@@ -48,6 +49,8 @@ func Touch(fpath string) (err os.Error) {
 }
 
 func MoveSource(oldpath, newpath string) (err os.Error) {
+	fmt.Printf("Moving %s to %s\n", oldpath, newpath)
+	
 	if _, e := os.Stat(newpath); e == nil {
 		BackupSource(newpath)
 	}
@@ -80,6 +83,8 @@ func MoveSource(oldpath, newpath string) (err os.Error) {
 }
 
 func NewSource(fpath string, file *ast.File) (err os.Error) {
+	fmt.Printf("Creating %s\n", fpath)
+	
 	dir, name := filepath.Split(fpath)
 	
 	err = Touch(filepath.Join(dir, "."+name+".gorfn"))
@@ -99,6 +104,8 @@ func NewSource(fpath string, file *ast.File) (err os.Error) {
 }
 
 func RewriteSource(fpath string, file *ast.File) (err os.Error) {
+	fmt.Printf("Rewriting %s\n", fpath)
+
 	err = BackupSource(fpath)
 	if err != nil {
 		return
