@@ -57,6 +57,7 @@ func main() {
 		"undo" : UndoCmd,
 		"scan" : ScanCmd,
 		"changes" : ChangesCmd,
+		"clear" : ClearCmd,
 	}
 	
 	rollCmds := map[string]func([]string) os.Error {

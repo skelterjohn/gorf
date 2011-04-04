@@ -87,7 +87,52 @@ func (this undoscanner) VisitFile(fpath string, f *os.FileInfo) {
 }
 
 func ChangesCmd(args []string) (err os.Error) {
-	return RollbackUndos()
+	var i int
+	for i=0; ; i++ {
+		changePath := filepath.Join(LocalRoot, fmt.Sprintf(".change.%d.gorfc", i))
+	
+		srcFile, err := os.Open(changePath, os.O_RDONLY, 0)
+		if err != nil {
+			break
+		}
+		
+		if i == 0 {
+			fmt.Printf("Recent refactorings\n")
+			fmt.Printf("Age\tCommand\n")		
+		}
+		
+		buf := make([]byte, 1024)
+		var n int
+		n, err = srcFile.Read(buf)
+		change := strings.TrimSpace(string(buf[:n]))
+		
+		fmt.Printf("%d:\t%s\n", i, change)
+	}
+	if i == 0 {
+		fmt.Printf("No refactorings found\n")
+	}
+	return
+}
+
+func ClearCmd(args []string) (err os.Error) {
+	filepath.Walk(LocalRoot, UndoRemover(0), nil)
+	return 
+}
+type UndoRemover int
+
+func (this UndoRemover) VisitDir(dpath string, f *os.FileInfo) bool {
+	return true
+}
+
+func (this UndoRemover) VisitFile(fpath string, f *os.FileInfo) {
+	if !(
+		strings.HasSuffix(fpath, ".gorf") ||
+		 strings.HasSuffix(fpath, ".gorfn") ||
+		 strings.HasSuffix(fpath, ".gorfc")) {
+		return
+	}
+	os.Remove(fpath)
+	return
 }
 
 func RollbackUndos() (err os.Error) {
