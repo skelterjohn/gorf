@@ -62,6 +62,7 @@ func ScanAllForImports(dir string) (err os.Error) {
 	sw := ScanWalker{}
 	filepath.Walk(dir, &sw, nil)
 	err = sw.err
+	
 	return
 }
 
@@ -78,9 +79,9 @@ func (s *ScanWalker) VisitDir(path string, f *os.FileInfo) bool {
 }
 
 func (s *ScanWalker) VisitFile(fpath string, f *os.FileInfo) {
-	if strings.HasSuffix(fpath, ".gorf") || strings.HasSuffix(fpath, ".gorfn") {
-		os.Remove(fpath)
-	}
+	//if strings.HasSuffix(fpath, ".gorf") || strings.HasSuffix(fpath, ".gorfn") {
+	//	os.Remove(fpath)
+	//}
 }
 
 //Look at the imports, and build up ImportedBy

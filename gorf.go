@@ -5,6 +5,9 @@
 package main
 
 import (
+	"io"
+	"strings"
+	"path/filepath"
 	"os"
 	"fmt"
 	"flag"
@@ -33,28 +36,57 @@ func MakeErr(format string, args ...interface{}) (os.Error) {
 func main() {
 	defer nicetrace.Print()
 	
+	var err os.Error
+	
+
+	erf := func(format string, args ...interface{}) {
+		fmt.Fprintf(os.Stderr, format, args...)
+	}
+	defer func() {
+		if err != nil {
+			erf("%v\n", err)
+		}
+	}()
+	
 	flag.StringVar(&LocalRoot, "r", ".", "Local package root")
 	flag.BoolVar(&Usage, "?", false, "Print usage and quit")
 	
 	flag.Parse()
 	
-	cmds := map[string]func([]string) os.Error {
+	norollCmds := map[string]func([]string) os.Error {
 		"undo" : UndoCmd,
+		"scan" : ScanCmd,
+		"changes" : ChangesCmd,
+	}
+	
+	rollCmds := map[string]func([]string) os.Error {
+		
 		"pkg" : PkgCmd,
 		"rename" : RenameCmd,
 		"move" : MoveCmd,
 		"merge" : MergeCmd,
-		"scan" : ScanCmd,
 	}
 	
-	foo, ok := cmds[flag.Arg(0)]
+	foo, ok := norollCmds[flag.Arg(0)]
 	if ok && Usage {
 		fmt.Print(Help(flag.Arg(0)))
 		return
 	}
-
-	erf := func(format string, args ...interface{}) {
-		fmt.Fprintf(os.Stderr, format, args...)
+	if !ok {
+		foo, ok = rollCmds[flag.Arg(0)]
+		err = RollbackUndos()
+		if err != nil {
+			return
+		}
+		
+		var out io.Writer
+		out, err = os.Open(filepath.Join(LocalRoot, ".change.0.gorfc"), os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
+		if err != nil {
+			return
+		}
+		cmdline := strings.Join(flag.Args(), " ")
+		fmt.Fprintf(out, "%s\n", cmdline)
+		//out.Close()
 	}
 			
 	if !ok || Usage || len(flag.Args()) == 0 {
@@ -64,8 +96,6 @@ func main() {
 		return
 	}
 	
-	err := foo(flag.Args()[1:])
-	if err != nil {
-		erf("%v\n", err)
-	}
+	err = foo(flag.Args()[1:])
+	
 }

@@ -37,7 +37,7 @@ func Copy(srcpath, dstpath string) (err os.Error) {
 
 func BackupSource(fpath string) (err os.Error) {
 	dir, name := filepath.Split(fpath)
-	backup := "."+name+".gorf"
+	backup := "."+name+".0.gorf"
 	err = Copy(fpath, filepath.Join(dir, backup))
 	return
 }
@@ -67,7 +67,7 @@ func MoveSource(oldpath, newpath string) (err os.Error) {
 		return
 	}
 	
-	err = Touch(filepath.Join(dir, "."+file+".gorfn"))
+	err = Touch(filepath.Join(dir, "."+file+".0.gorfn"))
 	if err != nil {
 		return
 	}
@@ -87,7 +87,7 @@ func NewSource(fpath string, file *ast.File) (err os.Error) {
 	
 	dir, name := filepath.Split(fpath)
 	
-	err = Touch(filepath.Join(dir, "."+name+".gorfn"))
+	err = Touch(filepath.Join(dir, "."+name+".0.gorfn"))
 	if err != nil {
 		return
 	}
