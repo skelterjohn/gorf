@@ -6,5 +6,5 @@ _go_.6
 gorf
 target.gb
 .project
-typelookup
 .goinstall
+testcases/tmp

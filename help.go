@@ -8,7 +8,7 @@ func Help(cmd string) string {
 	switch cmd {
 	case "undo":
 		return `Usage: gorf [flags] undo
-	"undo" will roll-back the last refactoring that occured.	
+	"undo" will roll-back one refactoring	
 `
 	case "scan":
 		return `Usage: gorf [flags] scan <path>

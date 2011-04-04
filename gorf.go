@@ -79,13 +79,15 @@ func main() {
 			return
 		}
 		
-		var out io.Writer
-		out, err = os.Open(filepath.Join(LocalRoot, ".change.0.gorfc"), os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
-		if err != nil {
-			return
+		if ok {
+			var out io.Writer
+			out, err = os.Open(filepath.Join(LocalRoot, ".change.0.gorfc"), os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
+			if err != nil {
+				return
+			}
+			cmdline := strings.Join(flag.Args(), " ")
+			fmt.Fprintf(out, "%s\n", cmdline)
 		}
-		cmdline := strings.Join(flag.Args(), " ")
-		fmt.Fprintf(out, "%s\n", cmdline)
 		//out.Close()
 	}
 			
