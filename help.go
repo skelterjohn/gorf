@@ -8,11 +8,15 @@ func Help(cmd string) string {
 	switch cmd {
 	case "undo":
 		return `Usage: gorf [flags] undo
-	"undo" will roll-back one refactoring	
+	"undo" will roll-back one refactoring.	
 `
-	case "scan":
-		return `Usage: gorf [flags] scan <path>
-	"scan" will print out the ast for the specified path.
+	case "clear":
+		return `Usage: gorf [flags] clear
+	"clear" will remove all files tracking changes.	
+`
+	case "changes":
+		return `Usage: gorf [flags] changes
+	"changes" will list each tracked refactoring. 
 `
 	case "pkg":
 		return `Usage: gorf [flags] pkg <path> <old name> <new name>

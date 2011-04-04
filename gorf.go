@@ -21,11 +21,13 @@ var (
 
 var UsageText = `Usage: gorf [flags] <command>
 commands:
-  scan <path>
-  pkg <path> <old name> <new name>
-  rename <path> [<type>.]<old name> <new name>
+  changes
+  clear
   move <old path> <new path> [<name>+]
   merge <old path> <new path>
+  pkg <path> <old name> <new name>
+  rename <path> [<type>.]<old name> <new name>
+  scan <path>
   undo
 `
 
