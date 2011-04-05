@@ -1,7 +1,7 @@
 package pkg2
 
 import (
-	fmt	"fmt"
+	"fmt"
 )
 
 func Bar() {

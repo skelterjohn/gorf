@@ -23,6 +23,8 @@ func MergeCmd(args []string) (err os.Error) {
 		return
 	}
 	
+	PreloadImportedBy(oldpath)
+	
 	defer func() {
 		if err != nil {
 			 UndoCmd([]string{})

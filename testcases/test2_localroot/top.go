@@ -2,7 +2,7 @@ package main
 
 import pkg2_0	"pkg2/T"
 import (
-	package1	"package1"
+	"package1"
 )
 
 func main() {

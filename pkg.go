@@ -12,26 +12,22 @@ import (
 )
 
 func PkgCmd(args []string) (err os.Error) {
-	if len(args) != 3 {
-		return MakeErr("Usage: gorf [flags] pkg <path> <old name> <new name>")
+	if len(args) != 2 {
+		return MakeErr("Usage: gorf [flags] pkg <path> <new name>")
 	}
 	
-	path, oldname, newname := args[0], args[1], args[2]
+	path, newname := args[0], args[1]
 	
-	if !IsLegalIdentifier(oldname) {
-		return MakeErr("Old name %s is not a legal identifier", oldname)
-	}
 	if !IsLegalIdentifier(newname) {
 		return MakeErr("New name %s is not a legal identifier", newname)
-	}
-	if oldname == newname {
-		return MakeErr("Old name and new name are the same")
 	}
 	
 	err = ScanAllForImports(LocalRoot)
 	if err != nil {
 		return
 	}
+	
+	PreloadImportedBy(path)
 	
 	defer func() {
 		if err != nil {
@@ -45,10 +41,7 @@ func PkgCmd(args []string) (err os.Error) {
 	
 	pkg := LocalImporter(path)
 	
-	if pkg.Name != oldname {
-		return MakeErr("Package name and old name don't match (%s != %s)", pkg.Name, oldname)
-	}
-	
+	oldname := pkg.Name
 	
 	for fpath, file := range pkg.Files {
 		file.Name.Name = newname
@@ -73,6 +66,7 @@ func PkgCmd(args []string) (err os.Error) {
 				path:path,
 				oldname:oldname,
 				newname:uniqueName,
+				pkgname:newname,
 			}
 			ast.Walk(&pc, file)
 			if pc.Updated {
@@ -87,6 +81,7 @@ func PkgCmd(args []string) (err os.Error) {
 type PkgChanger struct {
 	path string
 	oldname, newname string
+	pkgname string
 	Renamed bool
 	Updated bool
 }
@@ -104,26 +99,34 @@ func (this *PkgChanger) Visit(node ast.Node) ast.Visitor {
 	case *ast.ImportSpec:
 		if string(n.Path.Value) == QuotePath(this.path) {
 			if n.Name != nil {
-				if n.Name.Name == this.oldname {
-					n.Name.Name = this.newname
-					this.Updated = true
-				} else {
-					this.Renamed = true
-					return nil
+				
+				this.Renamed = true
+				return nil
+			} 
+			
+			if n.Name == nil && this.newname != this.pkgname {
+				n.Name = &ast.Ident{Name:this.newname}
+				this.Updated = true
+			}
+		}
+		
+		
+	case *ast.Ident:
+		if n.Name == this.oldname {
+			obj, typ := types.ExprType(n, LocalImporter)
+			if obj == nil {
+				n.Name = this.newname
+				this.Updated = true
+			}
+			if obj != nil {
+				if typ.Kind == ast.Pkg && obj.Name == this.oldname {
+					n.Name = this.newname
+					this.Updated = true	
 				}
 			}
 		}
-	case *ast.Ident:	
-		if n.Name == this.oldname {
-			obj, typ := types.ExprType(n, LocalImporter)
-			if typ.Kind == ast.Pkg && obj.Name == this.oldname {
-				n.Name = this.newname
-				this.Updated = true
-				
-				//obj2, _ := types.ExprType(n, LocalImporter)
-				//fmt.Printf("%v\n%T %v\n", obj, obj2, obj2)
-			}
-		}
+		
+		
 	}
 	
 	return this	

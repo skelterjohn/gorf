@@ -36,6 +36,8 @@ func RenameCmd(args []string) (err os.Error) {
 		return
 	}
 	
+	PreloadImportedBy(path)
+	
 	defer func() {
 		if err != nil {
 			 UndoCmd([]string{})

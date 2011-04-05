@@ -43,7 +43,7 @@ func LocalImporter(path string) (pkg *ast.Package) {
 		sourcefiles = append(sourcefiles, srcfile)
 	}
 	//fmt.Printf("Parsing %v\n", sourcefiles)
-	dirpkgs, err := parser.ParseFiles(AllSources, sourcefiles, parser.DeclarationErrors)
+	dirpkgs, err := parser.ParseFiles(AllSources, sourcefiles, 0)
 	if err != nil {
 		log.Println(err)
 		return
@@ -66,6 +66,12 @@ func ScanAllForImports(dir string) (err os.Error) {
 	return
 }
 
+func PreloadImportedBy(path string) {
+	for _, ipath := range ImportedBy[path] {
+		LocalImporter(ipath)
+	}
+}
+
 type ScanWalker struct {
 	err os.Error
 }
@@ -86,7 +92,7 @@ func (s *ScanWalker) VisitFile(fpath string, f *os.FileInfo) {
 
 //Look at the imports, and build up ImportedBy
 func ScanForImports(path string) (err os.Error) {
-	sourcefiles := filepath.Glob(filepath.Join(path, "*.go"))
+	sourcefiles, _ := filepath.Glob(filepath.Join(path, "*.go"))
 	dirpkgs, err := parser.ParseFiles(AllSourceTops, sourcefiles, parser.ImportsOnly)
 	
 	if err != nil {
@@ -134,7 +140,7 @@ type ImportScanner map[string]bool
 func (is ImportScanner) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.ImportSpec:
-		if n.Name.Name == "." {
+		if n.Name != nil && n.Name.Name == "." {
 			is["."] = false
 		}
 		is[string(n.Path.Value)] = true

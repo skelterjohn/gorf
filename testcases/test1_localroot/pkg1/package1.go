@@ -1,7 +1,7 @@
 package pkg1
 
 import (
-	fmt	"fmt"
+	"fmt"
 )
 
 func Foo() {

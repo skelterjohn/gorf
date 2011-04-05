@@ -21,7 +21,7 @@ func UndoCmd(args []string) (err os.Error) {
 	lastChangePath := filepath.Join(LocalRoot, ".change.0.gorfc")
 	
 	var srcFile *os.File
-	srcFile, err = os.Open(lastChangePath, os.O_RDONLY, 0)
+	srcFile, err = os.Open(lastChangePath)
 	if err != nil {
 		return
 	}
@@ -91,7 +91,7 @@ func ChangesCmd(args []string) (err os.Error) {
 	for i=0; ; i++ {
 		changePath := filepath.Join(LocalRoot, fmt.Sprintf(".change.%d.gorfc", i))
 	
-		srcFile, err := os.Open(changePath, os.O_RDONLY, 0)
+		srcFile, err := os.Open(changePath)
 		if err != nil {
 			break
 		}

@@ -16,13 +16,13 @@ import (
 
 func Copy(srcpath, dstpath string) (err os.Error) {
 	var srcFile *os.File
-	srcFile, err = os.Open(srcpath, os.O_RDONLY, 0)
+	srcFile, err = os.Open(srcpath)
 	if err != nil {
 		return
 	}
 
 	var dstFile *os.File
-	dstFile, err = os.Open(dstpath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
+	dstFile, err = os.Create(dstpath)
 	if err != nil {
 		return
 	}
@@ -43,7 +43,7 @@ func BackupSource(fpath string) (err os.Error) {
 }
 
 func Touch(fpath string) (err os.Error) {
-	f, err := os.Open(fpath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
+	f, err := os.Create(fpath)
 	f.Close()
 	return
 }
@@ -93,7 +93,7 @@ func NewSource(fpath string, file *ast.File) (err os.Error) {
 	}
 	
 	var out io.Writer
-	out, err = os.Open(fpath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
+	out, err = os.Create(fpath)
 	if err != nil {
 		return
 	}
@@ -112,7 +112,7 @@ func RewriteSource(fpath string, file *ast.File) (err os.Error) {
 	}
 
 	var out io.Writer
-	out, err = os.Open(fpath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
+	out, err = os.Create(fpath)
 	if err != nil {
 		return
 	}

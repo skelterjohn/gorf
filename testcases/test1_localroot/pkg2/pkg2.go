@@ -1,8 +1,8 @@
 package pkg2
 
 import (
-	fmt	"fmt"
-	pkg1	"pkg1"
+	"fmt"
+	"pkg1"
 )
 
 func Bar() {

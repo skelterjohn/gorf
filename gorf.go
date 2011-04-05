@@ -84,7 +84,7 @@ func main() {
 		
 		if ok {
 			var out io.Writer
-			out, err = os.Open(filepath.Join(LocalRoot, ".change.0.gorfc"), os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
+			out, err = os.Create(filepath.Join(LocalRoot, ".change.0.gorfc"))
 			if err != nil {
 				return
 			}
