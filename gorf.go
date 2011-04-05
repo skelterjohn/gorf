@@ -24,6 +24,7 @@ commands:
   changes
   clear
   move <old path> <new path> [<name>+]
+  moveall <old path> <new path>
   merge <old path> <new path>
   pkg <path> <old name> <new name>
   rename <path> [<type>.]<old name> <new name>
@@ -67,6 +68,7 @@ func main() {
 		"pkg" : PkgCmd,
 		"rename" : RenameCmd,
 		"move" : MoveCmd,
+		"moveall" : MoveAllCmd,
 		"merge" : MergeCmd,
 	}
 	

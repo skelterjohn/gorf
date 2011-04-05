@@ -5,11 +5,42 @@
 package main
 
 import (
+	"fmt"
+	"strings"
 	"os"
 	"go/ast"
 	"path/filepath"
 	"rog-go.googlecode.com/hg/exp/go/types"
 )
+
+func MoveAllCmd(args []string) (err os.Error) {
+	if len(args) != 2 {
+		return MakeErr("Usage: gorf [flags] moveall <old path> <new path>")
+	}
+	
+	oldPath, newPath := filepath.Clean(args[0]), filepath.Clean(args[1])
+	
+	err = ScanAllForImports(LocalRoot)
+	if err != nil {
+		return
+	}
+	
+	prefix := fmt.Sprintf("%s%c", oldPath, filepath.Separator)
+	fmt.Println("prefix:", prefix)
+	for opath := range PackageTops {
+		opath = fmt.Sprintf("%s%c", filepath.Clean(opath), filepath.Separator)
+		if strings.HasPrefix(opath, prefix) {
+			tail := opath[len(prefix):]
+			npath := filepath.Join(newPath, tail)
+			err = MoveCmd([]string{opath, npath})
+			if err != nil {
+				return
+			}
+		}
+	}
+	
+	return
+}
 
 func MoveCmd(args []string) (err os.Error) {
 	if len(args) < 2 {

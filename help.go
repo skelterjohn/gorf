@@ -30,6 +30,10 @@ func Help(cmd string) string {
 		return `Usage: gorf [flags] move <old path> <new path> [<name>+]
 	"move" will move a package, or (if names are specified) a subset of a package.
 `
+	case "moveall":
+		return `Usage: gorf [flags] moveall <old path> <new path>
+	"moveall" will move the package in the old path, and its nested packages, to the new path.
+`
 	case "merge":
 		return `Usage: gorf [flags] merge <old path> <new path>
 	"merge" will merge two packages.

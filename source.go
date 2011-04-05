@@ -35,10 +35,17 @@ func Copy(srcpath, dstpath string) (err os.Error) {
 	return
 }
 
+func FileExists(fpath string) bool {
+	_, err := os.Stat(fpath);
+	return err == nil
+}
+
 func BackupSource(fpath string) (err os.Error) {
 	dir, name := filepath.Split(fpath)
-	backup := "."+name+".0.gorf"
-	err = Copy(fpath, filepath.Join(dir, backup))
+	backup := filepath.Join(dir, "."+name+".0.gorf")
+	if !FileExists(backup) {
+		err = Copy(fpath, backup)
+	}
 	return
 }
 
@@ -51,23 +58,27 @@ func Touch(fpath string) (err os.Error) {
 func MoveSource(oldpath, newpath string) (err os.Error) {
 	fmt.Printf("Moving %s to %s\n", oldpath, newpath)
 	
-	if _, e := os.Stat(newpath); e == nil {
+	ndir, nfile := filepath.Split(newpath)
+	nmarker := filepath.Join(ndir, "."+nfile+".0.gorfn")
+	
+	if FileExists(newpath) {
 		BackupSource(newpath)
 	}
 	
-	err = BackupSource(oldpath)
+	odir, ofile := filepath.Split(newpath)
+	if !FileExists(filepath.Join(odir, "."+ofile+".0.gorfn")) {
+		err = BackupSource(oldpath)
+		if err != nil {
+			return
+		}
+	}
+	
+	err = os.MkdirAll(ndir, 0755)
 	if err != nil {
 		return
 	}
 	
-	dir, file := filepath.Split(newpath)
-	
-	err = os.MkdirAll(dir, 0755)
-	if err != nil {
-		return
-	}
-	
-	err = Touch(filepath.Join(dir, "."+file+".0.gorfn"))
+	err = Touch(nmarker)
 	if err != nil {
 		return
 	}
