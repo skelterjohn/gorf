@@ -16,7 +16,7 @@ func MergeCmd(args []string) (err os.Error) {
 		return MakeErr("Usage: gorf [flags] merge <old path> <new path>")
 	}
 
-	oldpath, newpath := args[0], args[1]
+	oldpath, newpath := filepath.Clean(args[0]), filepath.Clean(args[1])
 	
 	err = ScanAllForImports(LocalRoot)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"os"
 	"go/ast"
 	"strings"
+	"path/filepath"
 	"rog-go.googlecode.com/hg/exp/go/types"
 )	
 
@@ -15,7 +16,7 @@ func RenameCmd(args []string) (err os.Error) {
 	if len(args) != 3 {
 		return MakeErr("Usage: gorf [flags] rename <path> [<type>.]<old name> <new name>")
 	}
-	path, oldname, newname := args[0], args[1], args[2]
+	path, oldname, newname := filepath.Clean(args[0]), args[1], args[2]
 	
 	if oldnametoks := strings.Split(oldname, ".", 2); len(oldnametoks) == 2 {
 		return FieldCmd([]string{path, oldnametoks[0], oldnametoks[1], newname})

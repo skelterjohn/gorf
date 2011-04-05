@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"go/ast"
+	"path/filepath"
 	"rog-go.googlecode.com/hg/exp/go/types"
 )
 
@@ -16,7 +17,7 @@ func PkgCmd(args []string) (err os.Error) {
 		return MakeErr("Usage: gorf [flags] pkg <path> <new name>")
 	}
 	
-	path, newname := args[0], args[1]
+	path, newname := filepath.Clean(args[0]), args[1]
 	
 	if !IsLegalIdentifier(newname) {
 		return MakeErr("New name %s is not a legal identifier", newname)

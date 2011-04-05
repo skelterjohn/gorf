@@ -14,6 +14,7 @@ GOFILES=\
 	pkg.go\
 	rename.go\
 	scan.go\
+	singlemover.go\
 	source.go\
 	undo.go\
 	util.go\
