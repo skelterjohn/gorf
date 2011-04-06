@@ -43,7 +43,7 @@ func LocalImporter(path string) (pkg *ast.Package) {
 		sourcefiles = append(sourcefiles, srcfile)
 	}
 	//fmt.Printf("Parsing %v\n", sourcefiles)
-	dirpkgs, err := parser.ParseFiles(AllSources, sourcefiles, 0)
+	dirpkgs, err := parser.ParseFiles(AllSources, sourcefiles, parser.ParseComments)
 	if err != nil {
 		log.Println(err)
 		return
