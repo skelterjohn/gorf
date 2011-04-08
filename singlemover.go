@@ -226,6 +226,7 @@ func (this *SingleMover) CreateNewSource() (err os.Error) {
 			return &ast.SelectorExpr {
 				X : &ast.Ident {
 					Name : oldPkgNewName,
+					NamePos : idn.NamePos,
 				},
 				Sel : idn,
 			}
@@ -394,6 +395,7 @@ func (this *SingleMover) RemoveUpdatePkg() (err os.Error) {
 					return &ast.SelectorExpr {
 						X : &ast.Ident {
 							Name : newpkgname,
+							NamePos : idn.NamePos,
 						},
 						Sel : idn,
 					}
@@ -488,6 +490,7 @@ func (this *SingleMover) UpdateOther() (err os.Error) {
 						return &ast.SelectorExpr {
 							X : &ast.Ident {
 								Name : newpkgname,
+								NamePos : sel.X.Pos(),
 							},
 							Sel : sel.Sel,
 						}

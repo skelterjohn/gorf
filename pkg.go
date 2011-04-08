@@ -56,6 +56,9 @@ func PkgCmd(args []string) (err os.Error) {
 	
 	for _, ip := range ImportedBy[QuotePath(path)] {
 		ipkg := LocalImporter(ip)
+		if ipkg == nil {
+			return MakeErr("Problem getting package in %s", ip) 
+		}
 		for fpath, file := range ipkg.Files {
 			uniqueName := GetUniqueIdent([]*ast.File{file}, newname)
 			
@@ -63,7 +66,7 @@ func PkgCmd(args []string) (err os.Error) {
 				fmt.Printf("In %s: possible conflict with %s, using %s instead\n", fpath, newname, uniqueName)
 			}
 			
-			pc := PkgChanger{
+			pc := PkgChanger {
 				path:path,
 				oldname:oldname,
 				newname:uniqueName,
@@ -106,7 +109,10 @@ func (this *PkgChanger) Visit(node ast.Node) ast.Visitor {
 			} 
 			
 			if n.Name == nil && this.newname != this.pkgname {
-				n.Name = &ast.Ident{Name:this.newname}
+				n.Name = &ast.Ident {
+					Name : this.newname,
+					NamePos : n.Pos(),
+				}
 				this.Updated = true
 			}
 		}

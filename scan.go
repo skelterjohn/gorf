@@ -6,11 +6,10 @@ package main
 
 import (
 	"os"
-	//"fmt"
+	"fmt"
 	"go/token"
 	"go/ast"
 	"path/filepath"
-	"log"
 	"strings"
 	"rog-go.googlecode.com/hg/exp/go/types"
 	"rog-go.googlecode.com/hg/exp/go/parser"
@@ -45,7 +44,7 @@ func LocalImporter(path string) (pkg *ast.Package) {
 	//fmt.Printf("Parsing %v\n", sourcefiles)
 	dirpkgs, err := parser.ParseFiles(AllSources, sourcefiles, parser.ParseComments)
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		return
 	}
 	
@@ -96,7 +95,7 @@ func ScanForImports(path string) (err os.Error) {
 	dirpkgs, err := parser.ParseFiles(AllSourceTops, sourcefiles, parser.ImportsOnly)
 	
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 	}
 	
 	//take the first non-main. otherwise, main is ok.

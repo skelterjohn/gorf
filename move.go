@@ -85,6 +85,7 @@ func MoveCmd(args []string) (err os.Error) {
 	for fpath := range pkg.Files {
 		_, base := filepath.Split(fpath)
 		npath := filepath.Join(LocalRoot, newpath, base)
+		_ = npath
 		err = MoveSource(fpath, npath)
 		if err != nil {
 			return
@@ -97,6 +98,7 @@ func MoveCmd(args []string) (err os.Error) {
 			pcw := PathChangeWalker{OldPath:oldpath, NewPath:newpath}
 			ast.Walk(&pcw, file)
 			if pcw.Updated {
+				
 				err = RewriteSource(fpath, file)
 				if err != nil {
 					return

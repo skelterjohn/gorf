@@ -15,6 +15,11 @@ func ScanCmd(args []string) (err os.Error) {
 	ScanAllForImports(LocalRoot)
 	for _, path := range args {
 		pkg := LocalImporter(path)
+		
+		for _, file := range pkg.Files {
+			GetCommentTies(file)
+		}
+		
 		ast.Walk(DepthWalker(0), pkg)
 	}
 	return
@@ -32,6 +37,7 @@ func (this DepthWalker) Visit(node ast.Node) ast.Visitor {
 		buffer += " "
 	}
 	
+	fmt.Printf("%sPos: %d %s\n", buffer, node.Pos(), AllSources.Position(node.Pos()))
 	fmt.Printf("%s%T\n", buffer, node)
 	fmt.Printf("%s%v\n", buffer, node)
 	if e, ok := node.(ast.Expr); ok {

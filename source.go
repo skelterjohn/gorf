@@ -128,7 +128,7 @@ func RewriteSource(fpath string, file *ast.File) (err os.Error) {
 		return
 	}
 	
-	err = printer.Fprint(out, token.NewFileSet(), file)
+	err = printer.Fprint(out, AllSources, file)
 	
 	return
 }
