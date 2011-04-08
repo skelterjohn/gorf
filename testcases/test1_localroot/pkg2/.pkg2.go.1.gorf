@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"package1"
 )
-
+//a comment
 func Bar() {
 	fmt.Println("pkg2::Bar")
 }
 
 type T struct {
 	A, b int
+	//comment here too
 }
 
 func (t *T) Foo() {
