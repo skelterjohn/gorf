@@ -16,10 +16,6 @@ func ScanCmd(args []string) (err os.Error) {
 	for _, path := range args {
 		pkg := LocalImporter(path)
 		
-		for _, file := range pkg.Files {
-			GetCommentTies(file)
-		}
-		
 		ast.Walk(DepthWalker(0), pkg)
 	}
 	return
