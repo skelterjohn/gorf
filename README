@@ -1,15 +1,57 @@
-DO NOT RUN THIS ON IMPORTANT CODE
-
-IT WILL REWRITE YOUR CODE WITH NO GUARANTEE OF CORRECTNESS
+THIS PRODUCT IS IN BETA. THE AUTHOR TAKES NO RESPONSIBILITY FOR
+LOSS OF CODE. CREATE BACKUPS BEFORE USING.
 
 Usage: gorf [flags] <command>
 commands:
-  scan <path>
+  changes
+  clear
+  move <old path> <new path> [<name>+]
+  moveall <old path> <new path>
+  merge <old path> <new path>
   pkg <path> <old name> <new name>
   rename <path> [<type>.]<old name> <new name>
-  move <old path> <new path> [<name>+]
-  merge <old path> <new path>
+  scan <path>
   undo
 flags
   -?=false: Print usage and quit
   -r=".": Local package root
+
+Detailed command doc
+
+gorf changes
+- List all the backed up changes that gorf has made in the past,
+where the one indexed by zero is the most recent.
+
+gorf clear
+- Remove all gorf backups. Undos will not be possible after
+performing this action.
+
+gorf move <old path> <new path> [<name>+]
+- Move the package in the old path to the new path. If one or
+more names are specified, only the objects named will be moved
+to the new path, if possible (if it is not possible, nothing
+happens). Moving a type also moves methods with that type as
+its receiver.
+
+gorf moveall
+- Move everything in the old path, including nested packages,
+to the corresponding place in the new path.
+
+gorf merge <old path> <new path>
+- Merge the contents of the package in the old path into the new
+path.
+
+gorf pkg <path> <new name>
+- Rename a package (without changing its import path).
+
+gorf rename <path> [<type>.]<old name> <new name>
+- Rename an object in the package specified. If the old name
+is prefixed by a type, for instance "gorf rename path T.X Y",
+the X field in type T will be renamed to Y.
+
+gorf scan <path>
+- Print out a representation of the ast for this package.
+
+gorf undo
+- Undoes the change indexed by 0 in gorf changes, and decrements
+the index for all other changes.
