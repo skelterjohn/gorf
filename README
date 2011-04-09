@@ -1,6 +1,9 @@
 THIS PRODUCT IS IN BETA. THE AUTHOR TAKES NO RESPONSIBILITY FOR
 LOSS OF CODE. CREATE BACKUPS BEFORE USING.
 
+That being said, gorf does make backups of any change made, and
+there is a system for rolling them back.
+
 Usage: gorf [flags] <command>
 commands:
   changes
