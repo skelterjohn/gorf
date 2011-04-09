@@ -8,10 +8,7 @@ func Bar() {
 	fmt.Println("pkg2::Bar")
 }
 
-type (
-
-//comment here too
-)
+type ()
 
 
 func Baz() {

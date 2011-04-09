@@ -1,8 +1,13 @@
+// Copyright 2011 John Asmuth. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
 import (
 	"fmt"
 	"os"
+	"sort"
 	"unicode"
 	"utf8"
 	"path/filepath"
@@ -141,6 +146,13 @@ func (this *SingleMover) CollectUnexportedObjs() {
 	return
 }
 
+type NodeSorter []ast.Node
+func (this NodeSorter) Len() int {return len(this)}
+func (this NodeSorter) Less(i, j int) bool {return this[i].Pos() < this[j].Pos()}
+func (this NodeSorter) Swap(i, j int) {
+	this[i], this[j] = this[j], this[i]
+}
+
 func (this *SingleMover) CreateNewSource() (err os.Error) {
 	
 	liw := make(ListImportWalker)
@@ -169,7 +181,14 @@ func (this *SingleMover) CreateNewSource() (err os.Error) {
 		}
 	}
 	
+	var sortedNodes NodeSorter
+	
 	for mn := range this.moveNodes {
+		sortedNodes = append(sortedNodes, mn)
+	}
+	sort.Sort(sortedNodes)
+	
+	for _, mn := range sortedNodes {
 		switch m := mn.(type) {
 		case ast.Decl:
 			newfile.Decls = append(newfile.Decls, m)
@@ -180,7 +199,6 @@ func (this *SingleMover) CreateNewSource() (err os.Error) {
 			}
 			newfile.Decls = append(newfile.Decls, gdl)
 		}
-		
 	}
 	
 	npf := ExprParentFinder {
@@ -279,12 +297,47 @@ func (this *SingleMover) CreateNewSource() (err os.Error) {
 	}
 	newSourcePath := filepath.Join(this.newpath, this.pkg.Name+".go")
 	
+	containedComments := make(CommentCollector)
+	for node := range this.moveNodes {
+		ast.Walk(containedComments, node)
+	}
+	
+	for _, file := range this.pkg.Files {
+		for i:=len(file.Comments)-1; i>=0; i-- {
+			cg := file.Comments[i]
+			add := func() {
+				newfile.Comments = append([]*ast.CommentGroup{cg}, newfile.Comments...)
+				file.Comments[i] = file.Comments[len(file.Comments)-1]
+				file.Comments = file.Comments[:len(file.Comments)-1]
+			}
+			if containedComments[cg] {
+				add()
+			} else {
+				for node := range this.moveNodes {
+					if node.Pos() <= cg.Pos() && node.End() >= cg.End() {
+						add()
+						break
+					}
+				}
+			}
+		}
+		
+	}
 	err = NewSource(newSourcePath, newfile)
 	if err != nil {
 		return
 	}
 	
 	return
+}
+
+type CommentCollector map[*ast.CommentGroup]bool
+
+func (this CommentCollector) Visit(node ast.Node) ast.Visitor {
+	if cg, ok := node.(*ast.CommentGroup); ok {
+		this[cg] = true
+	}
+	return this
 }
 
 func (this *SingleMover) RemoveUpdatePkg() (err os.Error) {

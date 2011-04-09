@@ -3,11 +3,17 @@ package pkg2
 import pkg2_0	"pkg2"
 import "package1"
 
-func (t *T) Foo() {
-	package1.Foo()
+type T struct {
+	A, b int
+	//comment here too
 }
 
-type T struct{ A, b int }
+//bring?
+func (t *T) Foo() {
+	//c1
+	package1.Foo()
+	//c2
+}
 
 func (t *T) Bar() {
 	pkg2_0.Bar()

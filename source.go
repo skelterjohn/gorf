@@ -11,7 +11,6 @@ import (
 	"os"
 	"go/ast"
 	"go/printer"
-	"go/token"
 )
 
 func Copy(srcpath, dstpath string) (err os.Error) {
@@ -109,7 +108,7 @@ func NewSource(fpath string, file *ast.File) (err os.Error) {
 		return
 	}
 	
-	err = printer.Fprint(out, token.NewFileSet(), file)
+	err = printer.Fprint(out, AllSources, file)
 	
 	return
 }

@@ -14,8 +14,11 @@ type T struct {
 	//comment here too
 }
 
+//bring?
 func (t *T) Foo() {
+	//c1
 	pkg1.Foo()
+	//c2
 }
 
 func (t *T) Bar() {

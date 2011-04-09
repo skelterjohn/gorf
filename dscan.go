@@ -38,6 +38,7 @@ func (this DepthWalker) Visit(node ast.Node) ast.Visitor {
 	}
 	
 	fmt.Printf("%sPos: %d %s\n", buffer, node.Pos(), AllSources.Position(node.Pos()))
+	fmt.Printf("%sEnd: %d %s\n", buffer, node.End(), AllSources.Position(node.End()))
 	fmt.Printf("%s%T\n", buffer, node)
 	fmt.Printf("%s%v\n", buffer, node)
 	if e, ok := node.(ast.Expr); ok {
